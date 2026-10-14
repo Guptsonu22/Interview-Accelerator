@@ -224,3 +224,29 @@ async def test_adaptive_questioning_all_candidate_scenarios():
     assert res5["evaluated_turn"]["score"] <= 25
     assert res5["next_turn"]["question_category"] == "Core Competency Refocus"
     assert "refocus" in res5["next_turn"]["question_category"].lower() or "detail" in res5["next_turn"]["question_text"].lower()
+
+
+@pytest.mark.asyncio
+async def test_external_llm_provider_fallback_handling():
+    """
+    Verifies that ExternalLLMProvider safely and gracefully falls back to DemoProvider
+    when external credentials are missing or when an external API error occurs.
+    """
+    from backend.services.llm_provider import ExternalLLMProvider
+    ext_provider = ExternalLLMProvider("gemini")
+    assert ext_provider.is_demo is False
+    assert "GEMINI" in ext_provider.name
+
+    # Calling analyze_job with missing credentials triggers fallback without raising an exception
+    job_res = await ext_provider.analyze_job("Job Title: Backend Engineer at TestCo. Needs Python and FastAPI.")
+    assert job_res["role_title"] != ""
+    assert any("python" in s.lower() for s in job_res["required_skills"])
+
+    # Calling generate_question with missing credentials falls back safely
+    q_res = await ext_provider.generate_question({
+        "interview_level": "screening",
+        "turn_index": 0,
+        "job_analysis": job_res,
+        "candidate_analysis": {"candidate_name": "Test Candidate", "technical_skills": ["Python"]}
+    })
+    assert len(q_res["question_text"]) > 10

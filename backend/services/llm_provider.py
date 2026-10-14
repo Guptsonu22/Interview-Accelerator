@@ -277,7 +277,7 @@ class DemoProvider(LLMProvider):
         # If there is previous turn history, adapt dynamically to the candidate's last answer!
         last_turn = history[-1] if history else None
         last_eval = last_turn.get("evaluation", {}) if last_turn else {}
-        next_action = last_eval.get("next_action", "")
+        next_action = last_eval.get("next_action") or (last_turn.get("next_action") if last_turn else "")
         answer_type = last_eval.get("answer_type", "")
         last_q_category = last_turn.get("question_category", "the topic") if last_turn else "the topic"
         mentioned = last_eval.get("topics_mentioned", [])

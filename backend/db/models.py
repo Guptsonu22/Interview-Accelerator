@@ -306,7 +306,7 @@ class InterviewTurnDAO:
                     candidate_answer,
                     candidate_transcript,
                     1 if audio_used else 0,
-                    json.dumps(eval_result.get("rubric_breakdown", {})),
+                    json.dumps(eval_result),
                     eval_result.get("score", 0),
                     eval_result.get("feedback_good", ""),
                     eval_result.get("feedback_improve", ""),
