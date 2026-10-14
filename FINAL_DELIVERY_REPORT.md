@@ -190,6 +190,6 @@ backend/tests/test_interview.py::test_external_llm_provider_fallback_handling PA
 | :--- | :---: | :--- |
 | **GitHub Repository** | Ready to Push | `https://github.com/Guptsonu22/Interview-Accelerator.git` |
 | **Public Deployment URL** | Pending User Authorization | `NOT DEPLOYED` (Runs locally on `http://127.0.0.1:8000`) |
-| **Demo Screencast Video** | Pending User Recording | Script provided in [README.md](file:///c:/Users/Sonu/OneDrive/Desktop/Interview%20Accelerator/README.md#demo-video-walkthrough-script-35-minutes) |
-| **Master Audit Report** | Complete | [FINAL_AUDIT_REPORT.md](file:///c:/Users/Sonu/OneDrive/Desktop/Interview%20Accelerator/FINAL_AUDIT_REPORT.md) |
-| **Delivery Report** | Complete | [FINAL_DELIVERY_REPORT.md](file:///c:/Users/Sonu/OneDrive/Desktop/Interview%20Accelerator/FINAL_DELIVERY_REPORT.md) |
+| **Demo Screencast Video** | Pending User Recording | Script provided in [README.md](README.md#17-demo-video-walkthrough-script-35-minutes) |
+| **Master Audit Report** | Complete | [FINAL_AUDIT_REPORT.md](FINAL_AUDIT_REPORT.md) |
+| **Delivery Report** | Complete | [FINAL_DELIVERY_REPORT.md](FINAL_DELIVERY_REPORT.md) |

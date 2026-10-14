@@ -180,4 +180,4 @@ To complete your assignment submission:
    - GitHub Repository URL: `https://github.com/Guptsonu22/Interview-Accelerator.git`
    - Live Deployed URL (once deployed on Render/Railway)
    - Demo Video Link (YouTube / Loom / Google Drive)
-   - Final Delivery Report: [FINAL_DELIVERY_REPORT.md](file:///c:/Users/Sonu/OneDrive/Desktop/Interview%20Accelerator/FINAL_DELIVERY_REPORT.md)
+   - Final Delivery Report: [FINAL_DELIVERY_REPORT.md](FINAL_DELIVERY_REPORT.md)
