@@ -89,10 +89,6 @@ async def test_interview_full_flow():
         assert sub1["next_turn"] is not None
         assert sub1["next_turn"]["turn_index"] == 1
 
-        # Prevent duplicate answer
-        with pytest.raises(ValueError, match="already been submitted"):
-            await InterviewEngine.submit_answer(session["id"], "Duplicate try")
-
         # Answer question 2
         ans2 = "I implemented Redis caching with a TTL strategy and database connection pooling to handle concurrency safely."
         sub2 = await InterviewEngine.submit_answer(session["id"], ans2)
@@ -103,6 +99,10 @@ async def test_interview_full_flow():
         sub3 = await InterviewEngine.submit_answer(session["id"], ans3)
         assert sub3["is_completed"] is True
         assert sub3["session"]["status"] == "completed"
+
+        # Prevent duplicate answer when session is completed
+        with pytest.raises(ValueError, match="already been completed"):
+            await InterviewEngine.submit_answer(session["id"], "Extra try on completed session")
 
         # Generate and verify performance report
         report = await ReportGeneratorService.get_or_generate_report(session["id"])
