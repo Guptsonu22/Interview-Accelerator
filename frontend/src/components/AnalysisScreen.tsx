@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {
+import type {
   JobAnalysis,
   CandidateAnalysis,
   JobFitAssessment,
@@ -13,10 +13,7 @@ import {
   XCircle,
   Briefcase,
   Layers,
-  Sparkles,
-  ArrowRight,
-  ShieldAlert,
-  HelpCircle
+  ArrowRight
 } from 'lucide-react';
 
 interface AnalysisScreenProps {

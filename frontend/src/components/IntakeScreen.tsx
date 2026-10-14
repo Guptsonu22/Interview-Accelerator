@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, FileText, CheckCircle2, ArrowRight, Clock, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
-import { DocumentRecord, JobAnalysis, CandidateAnalysis, JobFitAssessment } from '../types';
+import type { DocumentRecord, JobAnalysis, CandidateAnalysis, JobFitAssessment } from '../types';
 
 interface IntakeScreenProps {
   onAnalysisComplete: (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
+import type {
   InterviewSession,
   InterviewTurn,
   PerformanceReport
@@ -18,11 +18,8 @@ import {
   Send,
   Sparkles,
   CheckCircle2,
-  AlertCircle,
-  HelpCircle,
   ChevronDown,
-  ChevronUp,
-  Award
+  ChevronUp
 } from 'lucide-react';
 
 interface InterviewRoomScreenProps {
@@ -36,8 +33,6 @@ interface InterviewRoomScreenProps {
 export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
   session,
   initialTurn,
-  roleTitle,
-  candidateName,
   onFinishSession,
 }) => {
   const [currentSession, setCurrentSession] = useState<InterviewSession>(session);

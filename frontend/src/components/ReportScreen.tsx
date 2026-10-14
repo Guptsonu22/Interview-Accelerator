@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { PerformanceReport } from '../types';
+import type { PerformanceReport } from '../types';
 import { api } from '../services/api';
 import {
-  Award,
   CheckCircle2,
   AlertTriangle,
   Download,
@@ -11,10 +10,7 @@ import {
   BookOpen,
   ChevronDown,
   ChevronUp,
-  Target,
-  Sparkles,
-  TrendingUp,
-  HelpCircle
+  TrendingUp
 } from 'lucide-react';
 
 interface ReportScreenProps {

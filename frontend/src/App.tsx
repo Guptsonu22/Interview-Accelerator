@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
+import type {
   ScreenView,
   DocumentRecord,
   JobAnalysis,
@@ -23,8 +23,6 @@ export const App: React.FC = () => {
   const [recentSessions, setRecentSessions] = useState<any[]>([]);
 
   // State
-  const [jobDoc, setJobDoc] = useState<DocumentRecord | null>(null);
-  const [resumeDoc, setResumeDoc] = useState<DocumentRecord | null>(null);
   const [jobAnalysis, setJobAnalysis] = useState<JobAnalysis | null>(null);
   const [candidateAnalysis, setCandidateAnalysis] = useState<CandidateAnalysis | null>(null);
   const [jobFit, setJobFit] = useState<JobFitAssessment | null>(null);
@@ -57,14 +55,12 @@ export const App: React.FC = () => {
   };
 
   const handleAnalysisComplete = (
-    jDoc: DocumentRecord,
-    rDoc: DocumentRecord,
+    _jDoc: DocumentRecord,
+    _rDoc: DocumentRecord,
     jAnalysis: JobAnalysis,
     cAnalysis: CandidateAnalysis,
     fit: JobFitAssessment
   ) => {
-    setJobDoc(jDoc);
-    setResumeDoc(rDoc);
     setJobAnalysis(jAnalysis);
     setCandidateAnalysis(cAnalysis);
     setJobFit(fit);
@@ -125,8 +121,6 @@ export const App: React.FC = () => {
       }
     }
     localStorage.removeItem('interview_accelerator_active_session');
-    setJobDoc(null);
-    setResumeDoc(null);
     setJobAnalysis(null);
     setCandidateAnalysis(null);
     setJobFit(null);
