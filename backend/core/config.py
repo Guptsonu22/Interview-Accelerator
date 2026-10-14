@@ -1,10 +1,12 @@
 import os
 from typing import List
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
     ENV: str = Field(default="development")
     HOST: str = Field(default="127.0.0.1")
     PORT: int = Field(default=8000)
@@ -34,10 +36,6 @@ class Settings(BaseSettings):
     @property
     def allowed_extensions_set(self) -> set:
         return {ext.strip().lower() for ext in self.ALLOWED_EXTENSIONS.split(",") if ext.strip()}
-
-    class Config:
-        env_file = ".env"
-        extra = "ignore"
 
 
 settings = Settings()

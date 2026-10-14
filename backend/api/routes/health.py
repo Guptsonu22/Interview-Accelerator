@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter
 from backend.core.config import settings
 from backend.services.llm_provider import get_llm_provider
@@ -34,5 +34,5 @@ def health_check():
             "max_upload_size_mb": settings.MAX_UPLOAD_SIZE_MB,
             "allowed_extensions": list(settings.allowed_extensions_set)
         },
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }

@@ -17,8 +17,7 @@ class DocumentDAO:
                 """,
                 (doc_id, doc_type, filename, raw_text, len(raw_text), meta_json)
             )
-            row = conn.execute("SELECT * FROM documents WHERE id = ?", (doc_id,)).fetchone()
-            return dict(row)
+        return DocumentDAO.get_by_id(doc_id)
 
     @staticmethod
     def get_by_id(doc_id: str) -> Optional[Dict[str, Any]]:
@@ -61,7 +60,7 @@ class JobAnalysisDAO:
                     json.dumps(analysis.get("tools_and_frameworks", [])),
                 )
             )
-            return JobAnalysisDAO.get_by_id(analysis_id)
+        return JobAnalysisDAO.get_by_id(analysis_id)
 
     @staticmethod
     def get_by_id(analysis_id: str) -> Optional[Dict[str, Any]]:
@@ -102,7 +101,7 @@ class CandidateAnalysisDAO:
                     json.dumps(analysis.get("quantified_claims", [])),
                 )
             )
-            return CandidateAnalysisDAO.get_by_id(analysis_id)
+        return CandidateAnalysisDAO.get_by_id(analysis_id)
 
     @staticmethod
     def get_by_id(analysis_id: str) -> Optional[Dict[str, Any]]:
@@ -149,7 +148,7 @@ class JobFitDAO:
                     json.dumps(fit_data.get("preparation_topics", [])),
                 )
             )
-            return JobFitDAO.get_by_id(fit_id)
+        return JobFitDAO.get_by_id(fit_id)
 
     @staticmethod
     def get_by_id(fit_id: str) -> Optional[Dict[str, Any]]:
@@ -179,7 +178,7 @@ class InterviewSessionDAO:
                 """,
                 (session_id, job_analysis_id, candidate_analysis_id, job_fit_id, interview_level, max_questions)
             )
-            return InterviewSessionDAO.get_by_id(session_id)
+        return InterviewSessionDAO.get_by_id(session_id)
 
     @staticmethod
     def get_by_id(session_id: str) -> Optional[Dict[str, Any]]:
@@ -250,7 +249,7 @@ class InterviewTurnDAO:
                 """,
                 (turn_id, session_id, turn_index, question_text, question_category, target_competency)
             )
-            return InterviewTurnDAO.get_by_id(turn_id)
+        return InterviewTurnDAO.get_by_id(turn_id)
 
     @staticmethod
     def get_by_id(turn_id: str) -> Optional[Dict[str, Any]]:
@@ -318,7 +317,7 @@ class InterviewTurnDAO:
                     turn_id
                 )
             )
-            return InterviewTurnDAO.get_by_id(turn_id)
+        return InterviewTurnDAO.get_by_id(turn_id)
 
 
 class PerformanceReportDAO:
@@ -356,7 +355,7 @@ class PerformanceReportDAO:
                     json.dumps(report_data.get("prioritized_prep_plan", [])),
                 )
             )
-            return PerformanceReportDAO.get_by_session(session_id)
+        return PerformanceReportDAO.get_by_session(session_id)
 
     @staticmethod
     def get_by_session(session_id: str) -> Optional[Dict[str, Any]]:
