@@ -219,6 +219,7 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
           {/* Voice Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button
+              id="btn-voice-play-pause"
               className="btn btn-secondary"
               style={{ padding: '6px 12px', fontSize: '0.8rem' }}
               onClick={() => {
@@ -237,6 +238,7 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
             </button>
 
             <button
+              id="btn-voice-mute"
               className="btn btn-secondary"
               style={{ padding: '6px 10px' }}
               onClick={speechSynthesis.toggleMute}
@@ -253,7 +255,7 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
             <span className="badge badge-primary">{currentTurn.question_category}</span>
             <span className="badge badge-warning">Target: {currentTurn.target_competency}</span>
           </div>
-          <p style={{ fontSize: '1.25rem', fontWeight: 600, lineHeight: 1.5, color: '#ffffff' }}>
+          <p id="current-question-text" style={{ fontSize: '1.25rem', fontWeight: 600, lineHeight: 1.5, color: '#ffffff' }}>
             "{currentTurn.question_text}"
           </p>
         </div>
@@ -292,6 +294,7 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
         {/* Big Mic Button & Controls Bar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
           <button
+            id="btn-mic-record"
             className={`btn ${speechRecognition.isListening ? 'btn-danger' : 'btn-primary'}`}
             style={{
               padding: '12px 24px',
@@ -308,6 +311,7 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
 
           {answerText && (
             <button
+              id="btn-clear-answer"
               className="btn btn-secondary"
               style={{ padding: '10px 16px', fontSize: '0.85rem' }}
               onClick={() => {
@@ -328,6 +332,8 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
             <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{answerText.length} characters</span>
           </label>
           <textarea
+            id="textarea-candidate-answer"
+            data-testid="candidate-answer"
             className="textarea-input"
             rows={6}
             placeholder="Your spoken words will appear here in real time. You can review, edit, or freely type your answer..."
@@ -339,6 +345,8 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
         {/* Submit Action */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
           <button
+            id="btn-submit-answer"
+            data-testid="submit-answer"
             className="btn btn-primary"
             style={{ padding: '12px 32px', fontSize: '1rem', minWidth: 200 }}
             disabled={isSubmitting || answerText.trim().length < 5}

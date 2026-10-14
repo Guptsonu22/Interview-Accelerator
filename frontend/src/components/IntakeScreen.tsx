@@ -198,6 +198,8 @@ export const IntakeScreen: React.FC<IntakeScreenProps> = ({
               <h2 style={{ fontSize: '1.15rem', fontWeight: 600 }}>Target Job Description</h2>
             </div>
             <button
+              id="btn-load-sample-jd"
+              data-testid="load-sample-jd"
               className="btn btn-secondary"
               style={{ fontSize: '0.75rem', padding: '4px 10px' }}
               onClick={handleLoadSampleJD}
@@ -208,6 +210,7 @@ export const IntakeScreen: React.FC<IntakeScreenProps> = ({
 
           <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
             <button
+              id="btn-jd-mode-paste"
               className={`btn ${jdMode === 'paste' ? 'btn-primary' : 'btn-secondary'}`}
               style={{ padding: '4px 12px', fontSize: '0.8rem' }}
               onClick={() => setJdMode('paste')}
@@ -215,6 +218,7 @@ export const IntakeScreen: React.FC<IntakeScreenProps> = ({
               Paste Text
             </button>
             <button
+              id="btn-jd-mode-upload"
               className={`btn ${jdMode === 'upload' ? 'btn-primary' : 'btn-secondary'}`}
               style={{ padding: '4px 12px', fontSize: '0.8rem' }}
               onClick={() => setJdMode('upload')}
@@ -226,6 +230,8 @@ export const IntakeScreen: React.FC<IntakeScreenProps> = ({
           {jdMode === 'paste' ? (
             <div>
               <textarea
+                id="textarea-jd"
+                data-testid="textarea-jd"
                 className="textarea-input"
                 rows={10}
                 placeholder="Paste the full job description here (title, requirements, tech stack, responsibilities)..."
@@ -276,6 +282,8 @@ export const IntakeScreen: React.FC<IntakeScreenProps> = ({
               <h2 style={{ fontSize: '1.15rem', fontWeight: 600 }}>Candidate Resume</h2>
             </div>
             <button
+              id="btn-load-sample-resume"
+              data-testid="load-sample-resume"
               className="btn btn-secondary"
               style={{ fontSize: '0.75rem', padding: '4px 10px' }}
               onClick={handleLoadSampleResume}
@@ -286,6 +294,7 @@ export const IntakeScreen: React.FC<IntakeScreenProps> = ({
 
           <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
             <button
+              id="btn-resume-mode-paste"
               className={`btn ${resumeMode === 'paste' ? 'btn-primary' : 'btn-secondary'}`}
               style={{ padding: '4px 12px', fontSize: '0.8rem' }}
               onClick={() => setResumeMode('paste')}
@@ -293,6 +302,7 @@ export const IntakeScreen: React.FC<IntakeScreenProps> = ({
               Paste Text
             </button>
             <button
+              id="btn-resume-mode-upload"
               className={`btn ${resumeMode === 'upload' ? 'btn-primary' : 'btn-secondary'}`}
               style={{ padding: '4px 12px', fontSize: '0.8rem' }}
               onClick={() => setResumeMode('upload')}
@@ -304,6 +314,8 @@ export const IntakeScreen: React.FC<IntakeScreenProps> = ({
           {resumeMode === 'paste' ? (
             <div>
               <textarea
+                id="textarea-resume"
+                data-testid="textarea-resume"
                 className="textarea-input"
                 rows={10}
                 placeholder="Paste candidate resume text here (summary, skills, work history, projects, metrics)..."
@@ -348,6 +360,8 @@ export const IntakeScreen: React.FC<IntakeScreenProps> = ({
       {/* Action CTA */}
       <div style={{ textAlign: 'center', marginBottom: 45 }}>
         <button
+          id="btn-analyze-match"
+          data-testid="analyze-match"
           className="btn btn-primary"
           style={{ padding: '14px 36px', fontSize: '1.05rem', minWidth: 280 }}
           disabled={isLoading}

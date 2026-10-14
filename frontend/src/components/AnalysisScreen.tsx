@@ -361,6 +361,8 @@ export const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
         </div>
 
         <button
+          id="btn-begin-interview"
+          data-testid="begin-interview"
           className="btn btn-primary"
           style={{ padding: '14px 40px', fontSize: '1.1rem', minWidth: 260 }}
           disabled={isStarting}
