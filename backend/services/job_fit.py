@@ -157,18 +157,22 @@ class JobFitService:
         # Categorical reasons
         key_reasons = []
         if matched_required:
-            key_reasons.append(f"Strong demonstrated alignment in {len(matched_required)} required competencies including {', '.join([s['skill'] for s in matched_required[:3]])}.")
+            skills_sample = [s["skill"] if isinstance(s, dict) else str(s) for s in matched_required[:3]]
+            key_reasons.append(f"Strong demonstrated alignment in {len(matched_required)} required competencies including {', '.join(skills_sample)}.")
         if missing_required:
-            key_reasons.append(f"Missing explicit resume proof for {len(missing_required)} core requirements ({', '.join([s['skill'] for s in missing_required[:3]])}).")
+            missing_sample = [s["skill"] if isinstance(s, dict) else str(s) for s in missing_required[:3]]
+            key_reasons.append(f"Missing explicit resume proof for {len(missing_required)} core requirements ({', '.join(missing_sample)}).")
         if cand_projects:
             key_reasons.append(f"Relevant project portfolio supports hands-on application of modern tech stack.")
         if not key_reasons:
             key_reasons.append("Baseline alignment established across foundational engineering skills.")
 
         # Preparation Topics
-        prep_topics = [s["skill"] for s in missing_required] + [s["skill"] for s in partial_required]
+        prep_topics = [s["skill"] if isinstance(s, dict) else str(s) for s in missing_required] + [
+            s["skill"] if isinstance(s, dict) else str(s) for s in partial_required
+        ]
         if not prep_topics:
-            prep_topics = [s["skill"] for s in req_skills[:3]]
+            prep_topics = [s["skill"] if isinstance(s, dict) else str(s) for s in req_skills[:3]]
 
         return {
             "overall_score": overall_score,
