@@ -119,12 +119,13 @@ class JobFitService:
 
         # 3. Project Evidence Alignment (20%)
         # Evaluates presence of technical projects with actual technology mentions
-        project_score = 40  # base
-        if cand_projects:
-            project_score += min(40, len(cand_projects) * 15)
-        if any(cls._normalize_skill(req) in cand_all_text for req in req_skills):
-            project_score += 20
-        project_score = min(100, project_score)
+        if not cand_projects:
+            project_score = 0
+        else:
+            project_score = 30 + min(40, len(cand_projects) * 15)
+            if any(cls._normalize_skill(req) in cand_all_text for req in req_skills):
+                project_score += 30
+            project_score = min(100, project_score)
 
         # 4. Responsibilities Alignment (15%)
         matched_resp_count = 0
@@ -134,15 +135,21 @@ class JobFitService:
             if len(overlap) >= 2:
                 matched_resp_count += 1
         num_resp = max(1, len(responsibilities))
-        resp_score = min(100, int((matched_resp_count / num_resp) * 100) + 20)
+        if matched_resp_count == 0:
+            resp_score = 0
+        else:
+            resp_score = min(100, int((matched_resp_count / num_resp) * 100))
 
         # 5. Experience & Qualification Alignment (15%)
-        exp_score = 50
-        if cand_exp:
-            exp_score += min(35, len(cand_exp) * 15)
-        if candidate_analysis.get("education"):
-            exp_score += 15
-        exp_score = min(100, exp_score)
+        if not cand_exp and not candidate_analysis.get("education"):
+            exp_score = 0
+        else:
+            exp_score = 20
+            if cand_exp:
+                exp_score += min(50, len(cand_exp) * 20)
+            if candidate_analysis.get("education"):
+                exp_score += 30
+            exp_score = min(100, exp_score)
 
         # Weighted Overall Score (0-100)
         overall_score = int(

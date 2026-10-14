@@ -274,21 +274,72 @@ class DemoProvider(LLMProvider):
         project_name = projects[0]["title"] if projects else "your recent project"
         quantified = candidate.get("quantified_claims", [])
 
-        # If previous answer was evaluated as weak or vague, adapt immediately!
+        # If there is previous turn history, adapt dynamically to the candidate's last answer!
         last_turn = history[-1] if history else None
         last_eval = last_turn.get("evaluation", {}) if last_turn else {}
-        last_score = last_eval.get("score", 75)
-        last_missing = last_eval.get("missing_concepts", [])
+        next_action = last_eval.get("next_action", "")
+        answer_type = last_eval.get("answer_type", "")
+        last_q_category = last_turn.get("question_category", "the topic") if last_turn else "the topic"
+        mentioned = last_eval.get("topics_mentioned", [])
+        topic_anchor = mentioned[0] if mentioned else (skills[0] if skills else "the system architecture")
 
-        if last_turn and last_score < 60 and last_missing:
-            # Clarify or probe fundamental
-            missing_topic = last_missing[0] if last_missing else "your approach"
-            return {
-                "question_text": f"In your previous response, you touched on the general approach, but didn't address {missing_topic}. Could you clarify specifically how you handled that aspect in a production setting?",
-                "question_category": "Clarification & Follow-Up",
-                "target_competency": "Problem Solving",
-                "difficulty": "standard"
-            }
+        if last_turn:
+            # 1. Candidate answered "I don't know" or admitted knowledge gap
+            if answer_type == "dont_know" or next_action == "pivot_fundamental":
+                return {
+                    "question_text": f"I appreciate your honesty in acknowledging that knowledge boundary. Pivoting to an adjacent fundamental concept: when you encounter an unfamiliar framework or protocol in production, what is your methodical process for learning, evaluating security risks, and safely adopting it?",
+                    "question_category": "Learning Agility & Fundamentals",
+                    "target_competency": "Problem Solving",
+                    "difficulty": "standard"
+                }
+
+            # 2. Candidate gave an empty or irrelevant answer
+            if answer_type == "irrelevant_or_empty" or next_action == "refocus":
+                return {
+                    "question_text": f"Your previous response didn't provide enough technical detail regarding {last_q_category}. To properly assess your competency for this {role_title} role, could you walk me through how you would practically implement {last_q_category} in a production environment?",
+                    "question_category": "Core Competency Refocus",
+                    "target_competency": "Technical Knowledge",
+                    "difficulty": "standard"
+                }
+
+            # 3. Candidate gave a vague answer
+            if answer_type == "vague" or next_action == "probe_vagueness":
+                return {
+                    "question_text": f"In your last response regarding {last_q_category}, you outlined a high-level approach but didn't specify the underlying mechanics. Could you drill into the exact data structures, libraries, or protocols you used, and what specific trade-offs guided that choice?",
+                    "question_category": "Technical Mechanics Probe",
+                    "target_competency": "Depth of Understanding",
+                    "difficulty": "challenging"
+                }
+
+            # 4. Candidate made an unevidenced or contradictory claim
+            if answer_type == "contradiction" or next_action == "probe_contradiction":
+                return {
+                    "question_text": f"You mentioned an extensive contribution that seems to stand out from your documented project scope. Could you clarify your specific individual architectural decisions and code contributions versus the pre-existing libraries or team components?",
+                    "question_category": "Claim Verification Probe",
+                    "target_competency": "Depth of Understanding",
+                    "difficulty": "challenging"
+                }
+
+            # 5. Candidate gave a strong, detailed answer
+            if answer_type == "strong" or next_action == "probe_deeper":
+                return {
+                    "question_text": f"That was a strong, structured breakdown of {topic_anchor}. Let's take it a step further: under extreme load where traffic increases 50x and network latency spikes, what is the single point of failure in that architecture, and how would you redesign it for high availability?",
+                    "question_category": "Advanced System Scaling",
+                    "target_competency": "Depth of Understanding",
+                    "difficulty": "challenging"
+                }
+
+            # 6. Fallback if score was low and missing concepts exist
+            last_score = last_eval.get("score", 75)
+            last_missing = last_eval.get("missing_concepts", [])
+            if last_score < 60 and last_missing:
+                missing_topic = last_missing[0] if last_missing else "your approach"
+                return {
+                    "question_text": f"In your previous response, you touched on the general approach, but didn't address {missing_topic}. Could you clarify specifically how you handled that aspect in a production setting?",
+                    "question_category": "Clarification & Follow-Up",
+                    "target_competency": "Problem Solving",
+                    "difficulty": "standard"
+                }
 
         # Level 1: Screening Interview
         if level == "screening":
@@ -440,77 +491,128 @@ class DemoProvider(LLMProvider):
         words = len(answer.split())
         lower_ans = answer.lower()
 
-        # Score calculation based on substantive evidence and structure
-        # Check for STAR methodology or structured answers (firstly, because, trade-off, result, metric)
-        has_metrics = bool(re.search(r"\d+%|\d+x|\d+ms|seconds|reduced|improved|scaled", lower_ans))
-        has_structure = any(w in lower_ans for w in ["first", "initially", "because", "therefore", "however", "result", "in conclusion", "for example"])
-        has_tech_depth = any(w in lower_ans for w in ["architecture", "latency", "cache", "database", "index", "async", "thread", "api", "schema", "retry", "fallback"])
+        # 1. Detection of specific candidate response scenarios
+        is_dont_know = bool(re.search(
+            r"\b(don't know|do not know|not sure|no idea|haven't worked with|have not worked with|unfamiliar with|haven't used|never used|pass)\b",
+            lower_ans
+        )) and words <= 25
 
-        # Calculate Rubric Components
-        # 1. Relevance (0-20)
-        relevance_score = 18 if words >= 30 else (12 if words >= 15 else 6)
-        
-        # 2. Technical Correctness (0-25)
-        tech_score = 22 if (has_tech_depth and words >= 40) else (17 if words >= 20 else 10)
-        
-        # 3. Depth of Understanding (0-20)
-        depth_score = 18 if (has_metrics or (words >= 50 and has_tech_depth)) else (14 if words >= 25 else 8)
-        
-        # 4. Reasoning & Justification (0-20)
-        reasoning_score = 18 if has_structure else (13 if words >= 20 else 7)
-        
-        # 5. Clarity & Structure (0-15)
-        clarity_score = 14 if (words >= 25 and has_structure) else (11 if words >= 10 else 6)
-
-        total_score = min(100, relevance_score + tech_score + depth_score + reasoning_score + clarity_score)
-
-        missing = []
-        if not has_metrics and ("metric" in question.lower() or "performance" in question.lower() or "baseline" in question.lower()):
-            missing.append("Specific baseline and post-implementation measurements")
-        if not has_tech_depth:
-            missing.append("Deep dive into architectural components and underlying protocols")
-        if not has_structure:
-            missing.append("Structured narrative detailing context, action, and verified resolution")
-
-        if not missing:
-            missing = ["Exploration of extreme failure modes and recovery runbooks"]
-
-        # Formulate actionable constructive feedback
-        good_points = []
-        if words >= 25:
-            good_points.append("Directly addressed the core prompt with clear technical terminology.")
-        if has_structure:
-            good_points.append("Logical sequencing connecting problem identification to solution.")
-        if has_tech_depth:
-            good_points.append("Demonstrated foundational grasp of component interactions.")
-        if not good_points:
-            good_points.append("Identified the overarching topic promptly.")
-
-        improve_points = []
-        if not has_metrics:
-            improve_points.append("Quantify outcomes using concrete baseline and end-state metrics.")
-        if words < 35:
-            improve_points.append("Expand on implementation details and architectural trade-offs.")
-        if missing:
-            improve_points.append(f"Ensure you address: {missing[0]}.")
-
-        ideal_direction = (
-            f"An exemplary response should follow the STAR structure: describe the high-stakes context, "
-            f"specify the exact architectural design or engineering decisions, explain why alternatives were rejected, "
-            f"and conclude with verified outcomes (e.g. 'reduced latency by 45% while handling 10k RPS')."
+        is_empty_or_irrelevant = (words < 4 and not is_dont_know) or bool(
+            re.search(r"^(pass|skip|na|n/a|none|nothing|idk|\.|\?|-)$", lower_ans.strip())
         )
 
-        follow_up = f"Practice formulating answers using concrete examples from your prior projects, explicitly articulating trade-offs."
+        is_contradiction = bool(re.search(
+            r"(created the entire (linux|python|database|internet)|wrote python from scratch|single-handedly built all of|1000000000%|infinite scale)",
+            lower_ans
+        ))
 
-        # Decide next engine action
-        next_action = "continue"
-        if total_score >= 80:
-            next_action = "probe_deeper"
-        elif total_score < 60:
-            next_action = "clarify_or_fundamentals"
+        has_metrics = bool(re.search(r"\d+%|\d+x|\d+ms|seconds|reduced|improved|scaled|rps|qps|users", lower_ans))
+        has_structure = any(w in lower_ans for w in ["first", "initially", "because", "therefore", "however", "result", "in conclusion", "for example", "specifically"])
+        has_tech_depth = any(w in lower_ans for w in [
+            "architecture", "latency", "cache", "database", "index", "async", "thread",
+            "api", "schema", "retry", "fallback", "jwt", "token", "redis", "postgres",
+            "fastapi", "docker", "pipeline", "load balancer", "worker", "queue"
+        ])
+
+        # Extract topics mentioned
+        mentioned_topics = []
+        for tech in ["jwt", "redis", "fastapi", "react", "postgres", "docker", "kubernetes", "async", "cache", "index", "p99", "queue", "testing"]:
+            if tech in lower_ans:
+                mentioned_topics.append(tech)
+
+        # 2. Determine Answer Quality & Rubric Scores
+        if is_empty_or_irrelevant:
+            answer_type = "irrelevant_or_empty"
+            relevance_score = 4
+            tech_score = 4
+            depth_score = 3
+            reasoning_score = 3
+            clarity_score = 4
+            total_score = 18
+            next_action = "refocus"
+            missing = ["Substantive technical response addressing the specific question"]
+            good_points = ["Response was received, but lacked relevant engineering content."]
+            improve_points = ["Provide a detailed answer with concrete technical concepts."]
+
+        elif is_dont_know:
+            answer_type = "dont_know"
+            relevance_score = 10
+            tech_score = 6
+            depth_score = 6
+            reasoning_score = 8
+            clarity_score = 12
+            total_score = 42
+            next_action = "pivot_fundamental"
+            missing = ["Direct operational experience with the specified technology"]
+            good_points = ["Demonstrated professional candor by acknowledging knowledge boundary rather than guessing."]
+            improve_points = ["Review foundational architecture and documentation for unfamiliar tools in the role stack."]
+
+        elif is_contradiction:
+            answer_type = "contradiction"
+            relevance_score = 12
+            tech_score = 10
+            depth_score = 8
+            reasoning_score = 8
+            clarity_score = 12
+            total_score = 50
+            next_action = "probe_contradiction"
+            missing = ["Realistic, verifiable scope of individual engineering contribution"]
+            good_points = ["Exhibited confidence in presentation."]
+            improve_points = ["Anchor claims to realistic individual impact rather than unverified extraordinary assertions."]
+
+        else:
+            # Check if vague
+            is_vague = (words < 25) or (not has_tech_depth and not has_metrics and not has_structure)
+            if is_vague:
+                answer_type = "vague"
+                relevance_score = 12
+                tech_score = 12
+                depth_score = 10
+                reasoning_score = 10
+                clarity_score = 10
+                total_score = 54
+                next_action = "probe_vagueness"
+                missing = ["Concrete implementation mechanics", "Underlying data structures and protocols"]
+                good_points = ["Touched on high-level intent."]
+                improve_points = ["Expand beyond generalities by providing specific implementation mechanics and measurable trade-offs."]
+            else:
+                is_strong = (words >= 35) and has_tech_depth and (has_metrics or has_structure)
+                if is_strong:
+                    answer_type = "strong"
+                    relevance_score = 20
+                    tech_score = 24
+                    depth_score = 19
+                    reasoning_score = 19
+                    clarity_score = 15
+                    total_score = 97
+                    next_action = "probe_deeper"
+                    missing = ["Extreme boundary conditions under distributed network partition"]
+                    good_points = ["Exemplary structured response with concrete technical depth and verifiable trade-offs."]
+                    improve_points = ["Consider addressing cross-region replication latency and multi-tenant isolation."]
+                else:
+                    answer_type = "acceptable"
+                    relevance_score = 16
+                    tech_score = 18
+                    depth_score = 14
+                    reasoning_score = 15
+                    clarity_score = 13
+                    total_score = 76
+                    next_action = "continue"
+                    missing = ["Deeper exploration of edge cases and performance trade-offs"]
+                    good_points = ["Directly addressed prompt with sound engineering reasoning."]
+                    improve_points = ["Include concrete baseline and end-state metrics to reinforce impact."]
+
+        ideal_direction = (
+            f"An exemplary response follows the STAR framework: articulate the precise problem context, "
+            f"detail the technical architecture and tools used, explain why alternative approaches were rejected, "
+            f"and substantiate the resolution with verified metrics (e.g. 'reduced P99 latency by 35% under 10k RPS')."
+        )
+        follow_up = f"Practice walking through technical decisions with concrete code-level details and measurable results."
 
         return {
             "score": total_score,
+            "answer_type": answer_type,
+            "topics_mentioned": mentioned_topics,
             "rubric_breakdown": {
                 "relevance": relevance_score,
                 "technical_correctness": tech_score,

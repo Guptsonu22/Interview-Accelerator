@@ -118,3 +118,109 @@ async def test_interview_full_flow():
         assert len(report["question_feedback_list"]) == 3
         assert len(report["demonstrated_strengths"]) > 0
         assert len(report["prioritized_prep_plan"]) == 3
+
+
+@pytest.mark.asyncio
+async def test_adaptive_questioning_all_candidate_scenarios():
+    """
+    Verifies that follow-up questions dynamically and genuinely adapt to:
+    - A strong, detailed answer.
+    - A vague answer.
+    - An answer stating that the candidate does not know.
+    - An answer with an impossible or contradictory claim.
+    - An empty or irrelevant answer.
+    """
+    doc1 = DocumentDAO.create("job_description", "jd2.txt", "Role: Systems Engineer at Apex. Needs Python, Distributed Systems, Redis.")
+    doc2 = DocumentDAO.create("resume", "resume2.txt", "Candidate: John Doe. Skills: Python, Redis. Built caching systems.")
+    job = JobAnalysisDAO.create(doc1["id"], {
+        "role_title": "Systems Engineer",
+        "company_name": "Apex",
+        "summary": "Distributed systems role",
+        "responsibilities": ["Build scalable caching", "Handle network partitions"],
+        "required_skills": ["Python", "Redis", "Distributed Systems"],
+        "preferred_skills": ["FastAPI"],
+        "technical_competencies": ["Python", "Redis"],
+        "behavioral_competencies": ["Problem Solving"],
+        "experience_level": "3+ years",
+        "education_requirements": "BS CS",
+        "tools_and_frameworks": ["Redis", "Python"]
+    })
+    cand = CandidateAnalysisDAO.create(doc2["id"], {
+        "candidate_name": "John Doe",
+        "summary": "Backend dev",
+        "technical_skills": ["Python", "Redis"],
+        "soft_skills": ["Problem Solving"],
+        "education": [{"degree": "BS CS"}],
+        "experience": [{"role": "Systems Engineer"}],
+        "projects": [{"title": "Cache Layer", "bullets": ["Improved latency"]}],
+        "achievements": ["Deployed Redis"],
+        "quantified_claims": ["Reduced latency by 45%"]
+    })
+    fit = JobFitDAO.create(job["id"], cand["id"], {
+        "overall_score": 75,
+        "required_skills_score": 80,
+        "preferred_skills_score": 60,
+        "project_evidence_score": 75,
+        "experience_score": 75,
+        "responsibility_score": 75,
+        "category_breakdown": {},
+        "matched_skills": [{"skill": "Python"}],
+        "partial_skills": [],
+        "missing_skills": [],
+        "key_reasons": ["Good match"],
+        "preparation_topics": ["Distributed Redis"]
+    })
+
+    # Helper to start session
+    async def create_session():
+        res = await InterviewEngine.start_session(
+            job_analysis_id=job["id"],
+            candidate_analysis_id=cand["id"],
+            job_fit_id=fit["id"],
+            interview_level="competency",
+            max_questions=4
+        )
+        return res["session"]["id"]
+
+    # Scenario 1: Strong, detailed answer -> Next question pushes deeper into scaling & failure modes
+    s1 = await create_session()
+    strong_ans = (
+        "In our cache architecture, we used Redis cluster with master-replica replication and client-side sharding. "
+        "We implemented connection pooling and pipelining, and tuned TCP keepalive settings. As a result, "
+        "we reduced P99 latency by 45% under 15,000 requests per second while avoiding cache stampedes with probabilistic early expiration."
+    )
+    res1 = await InterviewEngine.submit_answer(s1, strong_ans)
+    assert res1["evaluated_turn"]["score"] >= 80
+    assert res1["next_turn"]["question_category"] == "Advanced System Scaling"
+    assert "extreme load" in res1["next_turn"]["question_text"].lower()
+
+    # Scenario 2: Vague answer -> Next question probes technical mechanics and specific libraries
+    s2 = await create_session()
+    vague_ans = "We just used Python and some libraries to make it work and it was pretty fast."
+    res2 = await InterviewEngine.submit_answer(s2, vague_ans)
+    assert res2["evaluated_turn"]["score"] <= 60
+    assert res2["next_turn"]["question_category"] == "Technical Mechanics Probe"
+    assert "underlying mechanics" in res2["next_turn"]["question_text"].lower()
+
+    # Scenario 3: Candidate states they don't know -> Next question pivots to fundamentals & learning agility
+    s3 = await create_session()
+    dont_know_ans = "I honestly do not know how Redis clustering handles split-brain because I have not worked with distributed Redis."
+    res3 = await InterviewEngine.submit_answer(s3, dont_know_ans)
+    assert "candor" in res3["evaluated_turn"]["feedback_good"].lower()
+    assert res3["next_turn"]["question_category"] == "Learning Agility & Fundamentals"
+    assert "knowledge boundary" in res3["next_turn"]["question_text"].lower()
+
+    # Scenario 4: Contradictory / impossible assertion -> Next question probes claim verification
+    s4 = await create_session()
+    contra_ans = "During my two month internship I single-handedly built all of the database and wrote Python from scratch."
+    res4 = await InterviewEngine.submit_answer(s4, contra_ans)
+    assert res4["next_turn"]["question_category"] == "Claim Verification Probe"
+    assert "individual" in res4["next_turn"]["question_text"].lower()
+
+    # Scenario 5: Empty / irrelevant answer -> Next question refocuses candidate
+    s5 = await create_session()
+    empty_ans = "pass"
+    res5 = await InterviewEngine.submit_answer(s5, empty_ans)
+    assert res5["evaluated_turn"]["score"] <= 25
+    assert res5["next_turn"]["question_category"] == "Core Competency Refocus"
+    assert "refocus" in res5["next_turn"]["question_category"].lower() or "detail" in res5["next_turn"]["question_text"].lower()

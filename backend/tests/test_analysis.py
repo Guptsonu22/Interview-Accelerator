@@ -82,3 +82,41 @@ async def test_job_fit_deterministic_calculation():
     assert len(fit1["matched_skills"]) > 0
     assert len(fit1["key_reasons"]) > 0
     assert len(fit1["preparation_topics"]) > 0
+
+
+@pytest.mark.asyncio
+async def test_job_fit_edge_cases_empty_and_unrelated():
+    provider = DemoProvider()
+    job = await provider.analyze_job(SAMPLE_JD)
+
+    # 1. Edge Case: Completely empty candidate profile
+    empty_cand = {
+        "candidate_name": "Unknown",
+        "technical_skills": [],
+        "soft_skills": [],
+        "education": [],
+        "experience": [],
+        "projects": [],
+        "quantified_claims": []
+    }
+    empty_fit = JobFitService.calculate_job_fit(job, empty_cand)
+    assert empty_fit["overall_score"] == 0
+    assert empty_fit["required_skills_score"] == 0
+    assert empty_fit["project_evidence_score"] == 0
+    assert empty_fit["experience_score"] == 0
+    assert len(empty_fit["missing_skills"]) > 0
+
+    # 2. Edge Case: Completely unrelated profile (e.g. Culinary background)
+    unrelated_cand = {
+        "candidate_name": "Chef Mario",
+        "technical_skills": ["Pastry Making", "Sauce Reduction", "Kitchen Inventory"],
+        "soft_skills": ["Menu Planning"],
+        "education": [{"degree": "Culinary Arts"}],
+        "experience": [{"role": "Executive Chef", "details": "Managed restaurant dinner rush"}],
+        "projects": [{"title": "Seasonal Menu Launch", "bullets": ["Designed 15 new dishes"]}],
+        "quantified_claims": ["Served 400 covers nightly"]
+    }
+    unrelated_fit = JobFitService.calculate_job_fit(job, unrelated_cand)
+    assert unrelated_fit["overall_score"] < 25
+    assert unrelated_fit["required_skills_score"] == 0
+    assert len(unrelated_fit["missing_skills"]) >= len(job["required_skills"])
