@@ -2,7 +2,7 @@
 > **AI-Powered Role-Specific Interview Preparation & Candidate Readiness Engine**  
 > *Built for EDXSO Assignment 3: AI Product Engineer Intern*
 
-[![Test Suite](https://img.shields.io/badge/Pytest-14%2F14%20Passing-brightgreen?style=flat-square)](file:///c:/Users/Sonu/OneDrive/Desktop/Interview%20Accelerator/backend/tests)
+[![Test Suite](https://img.shields.io/badge/Pytest-17%2F17%20Passing-brightgreen?style=flat-square)](file:///c:/Users/Sonu/OneDrive/Desktop/Interview%20Accelerator/backend/tests)
 [![Vite Build](https://img.shields.io/badge/Frontend-Vite%208%20%7C%20React%2019-blue?style=flat-square)](file:///c:/Users/Sonu/OneDrive/Desktop/Interview%20Accelerator/frontend)
 [![Zero-Cost Demo Mode](https://img.shields.io/badge/Offline%20AI-Demo%20Provider%20Ready-success?style=flat-square)](file:///c:/Users/Sonu/OneDrive/Desktop/Interview%20Accelerator/.env.example)
 [![Web Speech API](https://img.shields.io/badge/Voice%20Interaction-STT%20%2B%20TTS-orange?style=flat-square)](file:///c:/Users/Sonu/OneDrive/Desktop/Interview%20Accelerator/frontend/src/hooks)
@@ -269,6 +269,7 @@ python -m pytest -v
 - ✅ `test_job_analysis_extraction`: Validates structured JD entity parsing.
 - ✅ `test_candidate_analysis_extraction`: Validates resume experience, skills, and projects parsing.
 - ✅ `test_job_fit_deterministic_calculation`: Validates 5-dimension weighting and score reproducibility.
+- ✅ `test_job_fit_edge_cases_empty_and_unrelated`: Validates 0-score baseline for empty resumes and low scoring for unrelated candidates.
 - ✅ `test_health_endpoint`: Checks `/api/health` and SQLite DB connectivity.
 - ✅ `test_document_paste_and_analysis_api`: Tests end-to-end HTTP intake and analysis pipeline.
 - ✅ `test_sanitize_text`: Validates text normalization and character cleaning.
@@ -280,8 +281,10 @@ python -m pytest -v
 - ✅ `test_parse_docx_bytes`: Tests Word document binary stream extraction.
 - ✅ `test_parse_file_too_short`: Rejects insufficient input content.
 - ✅ `test_interview_full_flow`: Validates full 3-turn interview session, dynamic question transitions, answer evaluation, 7-competency aggregation, and performance report generation.
+- ✅ `test_adaptive_questioning_all_candidate_scenarios`: Validates dynamic follow-ups for strong, vague, dont-know, contradictory, and empty responses.
+- ✅ `test_external_llm_provider_fallback_handling`: Validates safe, transparent fallback to DemoProvider when external API keys are missing or network errors occur.
 
-**Pytest Status**: `14 passed in 2.34s`.  
+**Pytest Status**: `17 passed in 5.15s`.  
 **Frontend Build Status**: `tsc -b && vite build` completed cleanly with zero warnings (`dist/` generated).
 
 ---
