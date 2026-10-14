@@ -1,122 +1,188 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import {
+  ScreenView,
+  DocumentRecord,
+  JobAnalysis,
+  CandidateAnalysis,
+  JobFitAssessment,
+  InterviewSession,
+  InterviewTurn,
+  PerformanceReport,
+  HealthStatus
+} from './types';
+import { api } from './services/api';
+import { Navbar } from './components/Navbar';
+import { IntakeScreen } from './components/IntakeScreen';
+import { AnalysisScreen } from './components/AnalysisScreen';
+import { InterviewRoomScreen } from './components/InterviewRoomScreen';
+import { ReportScreen } from './components/ReportScreen';
 
-function App() {
-  const [count, setCount] = useState(0)
+export const App: React.FC = () => {
+  const [currentView, setCurrentView] = useState<ScreenView>('intake');
+  const [health, setHealth] = useState<HealthStatus | null>(null);
+  const [recentSessions, setRecentSessions] = useState<any[]>([]);
+
+  // State
+  const [jobDoc, setJobDoc] = useState<DocumentRecord | null>(null);
+  const [resumeDoc, setResumeDoc] = useState<DocumentRecord | null>(null);
+  const [jobAnalysis, setJobAnalysis] = useState<JobAnalysis | null>(null);
+  const [candidateAnalysis, setCandidateAnalysis] = useState<CandidateAnalysis | null>(null);
+  const [jobFit, setJobFit] = useState<JobFitAssessment | null>(null);
+
+  const [session, setSession] = useState<InterviewSession | null>(null);
+  const [currentTurn, setCurrentTurn] = useState<InterviewTurn | null>(null);
+  const [roleTitle, setRoleTitle] = useState<string>('');
+  const [candidateName, setCandidateName] = useState<string>('');
+  const [report, setReport] = useState<PerformanceReport | null>(null);
+
+  // Initial load: health check & recent sessions
+  useEffect(() => {
+    api.getHealth()
+      .then((h) => setHealth(h))
+      .catch((err) => console.warn('Health check issue:', err));
+
+    loadRecentSessions();
+
+    // Check localStorage for active session
+    const savedSessionId = localStorage.getItem('interview_accelerator_active_session');
+    if (savedSessionId) {
+      handleResumeSession(savedSessionId);
+    }
+  }, []);
+
+  const loadRecentSessions = () => {
+    api.listRecentSessions()
+      .then((s) => setRecentSessions(s))
+      .catch((err) => console.warn('Could not load recent sessions:', err));
+  };
+
+  const handleAnalysisComplete = (
+    jDoc: DocumentRecord,
+    rDoc: DocumentRecord,
+    jAnalysis: JobAnalysis,
+    cAnalysis: CandidateAnalysis,
+    fit: JobFitAssessment
+  ) => {
+    setJobDoc(jDoc);
+    setResumeDoc(rDoc);
+    setJobAnalysis(jAnalysis);
+    setCandidateAnalysis(cAnalysis);
+    setJobFit(fit);
+    setRoleTitle(jAnalysis.role_title);
+    setCandidateName(cAnalysis.candidate_name);
+    setCurrentView('analysis');
+  };
+
+  const handleStartInterview = (
+    newSession: InterviewSession,
+    turn: InterviewTurn,
+    role: string,
+    candidate: string
+  ) => {
+    setSession(newSession);
+    setCurrentTurn(turn);
+    setRoleTitle(role);
+    setCandidateName(candidate);
+    localStorage.setItem('interview_accelerator_active_session', newSession.id);
+    setCurrentView('interview');
+    loadRecentSessions();
+  };
+
+  const handleFinishSession = (completedReport: PerformanceReport) => {
+    setReport(completedReport);
+    setCurrentView('report');
+    localStorage.removeItem('interview_accelerator_active_session');
+    loadRecentSessions();
+  };
+
+  const handleResumeSession = async (sessionId: string) => {
+    try {
+      const detail = await api.getSessionDetail(sessionId);
+      setSession(detail.session);
+      setRoleTitle(detail.role_title || 'Software Role');
+      setCandidateName(detail.candidate_name || 'Candidate');
+
+      if (detail.session.status === 'completed') {
+        const rep = await api.getReport(sessionId);
+        setReport(rep);
+        setCurrentView('report');
+      } else {
+        if (detail.current_turn) {
+          setCurrentTurn(detail.current_turn);
+        }
+        setCurrentView('interview');
+      }
+    } catch (err) {
+      console.warn('Could not restore session:', err);
+      localStorage.removeItem('interview_accelerator_active_session');
+    }
+  };
+
+  const handleReset = () => {
+    if (currentView === 'interview' && session?.status !== 'completed') {
+      if (!window.confirm('Reset current intake? Unfinished session answers will be preserved in history.')) {
+        return;
+      }
+    }
+    localStorage.removeItem('interview_accelerator_active_session');
+    setJobDoc(null);
+    setResumeDoc(null);
+    setJobAnalysis(null);
+    setCandidateAnalysis(null);
+    setJobFit(null);
+    setSession(null);
+    setCurrentTurn(null);
+    setReport(null);
+    setCurrentView('intake');
+    loadRecentSessions();
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app-container">
+      <Navbar
+        currentView={currentView}
+        onNavigate={(v) => setCurrentView(v)}
+        health={health}
+        onReset={handleReset}
+        canNavigateAnalysis={Boolean(jobAnalysis && candidateAnalysis && jobFit)}
+        canNavigateInterview={Boolean(session && currentTurn)}
+        canNavigateReport={Boolean(report)}
+      />
 
-      <div className="ticks"></div>
+      <main>
+        {currentView === 'intake' && (
+          <IntakeScreen
+            onAnalysisComplete={handleAnalysisComplete}
+            recentSessions={recentSessions}
+            onResumeSession={handleResumeSession}
+          />
+        )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        {currentView === 'analysis' && jobAnalysis && candidateAnalysis && jobFit && (
+          <AnalysisScreen
+            jobAnalysis={jobAnalysis}
+            candidateAnalysis={candidateAnalysis}
+            jobFit={jobFit}
+            onStartInterview={handleStartInterview}
+          />
+        )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
-}
+        {currentView === 'interview' && session && currentTurn && (
+          <InterviewRoomScreen
+            session={session}
+            initialTurn={currentTurn}
+            roleTitle={roleTitle}
+            candidateName={candidateName}
+            onFinishSession={handleFinishSession}
+          />
+        )}
 
-export default App
+        {currentView === 'report' && report && (
+          <ReportScreen report={report} onReset={handleReset} />
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default App;

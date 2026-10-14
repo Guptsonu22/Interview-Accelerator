@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScreenView, HealthStatus } from '../types';
+import type { ScreenView, HealthStatus } from '../types';
 import { Sparkles, FileText, CheckCircle2, Mic, Award, RotateCcw } from 'lucide-react';
 
 interface NavbarProps {
