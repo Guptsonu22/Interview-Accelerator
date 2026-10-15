@@ -82,20 +82,6 @@ Interview Accelerator systematically solves this by parsing target Job Descripti
 *7-competency rubrics, deterministic readiness category, ideal model answers, and prioritized study drills.*
 ![Performance Report](docs/screenshots/03_performance_report.png)
 
-### Evaluator Demo Video Walkthrough Script (3–5 Minutes)
-
-When recording or evaluating a video demonstration, follow this recommended sequence:
-
-| Time | Action & Screen | Key Talking Points |
-| :--- | :--- | :--- |
-| **0:00 – 0:45** | **Intake Screen** | • Introduce Interview Accelerator and the StudentCredibility problem statement (under-evidenced vs underqualified).<br>• Click `Load Sample JD` and `Load Sample Resume`.<br>• Click `Analyze Role Match & Job Fit`. |
-| **0:45 – 1:30** | **Job Fit Dashboard** | • Review the 5-dimension Job Fit score breakdown.<br>• Highlight categorized competencies (Matched, Partial, Missing).<br>• Point out the `Demo Mode (Offline AI)` badge demonstrating zero paid API dependency.<br>• Select **Level 2 (Competency)** or **Level 3 (Deep-Dive)** and click `Start Adaptive Interview`. |
-| **1:30 – 3:00** | **Interview Room** | • Click `🔊 Replay Question` to demonstrate text-to-speech.<br>• Click `🎙️ Speak Answer` to demonstrate microphone speech-to-text with the editable transcript review buffer.<br>• Submit an answer and observe the dynamic follow-up question adapting to your specific response. |
-| **3:00 – 4:30** | **Performance Report** | • Review the Overall Score and the deterministic Readiness Verdict.<br>• Inspect the 7 Core Competency Diagnostics.<br>• Review question feedback with Ideal Model Answers and the Prioritized Preparation Plan.<br>• Click `Download Markdown Report` and `Print / Save as PDF`. |
-| **4:30 – 5:00** | **Architecture & Wrap-Up** | • Summarize the FastAPI + SQLite WAL + React 19 architecture.<br>• Note that 17/17 automated Pytests pass and multi-stage Docker packaging is verified. |
-
----
-
 ## 5. Architecture Overview
 
 ```mermaid
