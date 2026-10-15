@@ -96,7 +96,7 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
-      } catch (err: any) {
+      } catch {
         setVideoNotice('Camera permission was not granted or no webcam was detected. You can seamlessly proceed using voice or text.');
         setIsVideoEnabled(false);
       }
@@ -364,6 +364,22 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
             <span>{speechRecognition.isListening ? 'Stop Recording' : 'Speak Answer (Microphone)'}</span>
           </button>
 
+          <button
+            id="btn-toggle-video"
+            type="button"
+            className={`btn ${isVideoEnabled ? 'btn-primary' : 'btn-secondary'}`}
+            style={{
+              padding: '12px 20px',
+              fontSize: '0.95rem',
+              borderRadius: 30,
+            }}
+            onClick={handleToggleVideo}
+            title={isVideoEnabled ? 'Turn off camera' : 'Enable live camera preview (Video Interview Mode)'}
+          >
+            {isVideoEnabled ? <CameraOff size={18} /> : <Camera size={18} />}
+            <span>{isVideoEnabled ? 'Disable Camera' : 'Video Mode (Camera)'}</span>
+          </button>
+
           {answerText && (
             <button
               id="btn-clear-answer"
@@ -379,6 +395,76 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
             </button>
           )}
         </div>
+
+        {/* Video Mode Notice if permission denied */}
+        {videoNotice && (
+          <div style={{ padding: '10px 14px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: 10, fontSize: '0.8rem', color: '#fca5a5', marginBottom: 14 }}>
+            {videoNotice}
+          </div>
+        )}
+
+        {/* Live Video Camera Tile (when enabled) */}
+        {isVideoEnabled && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 16,
+              padding: 14,
+              marginBottom: 16,
+              background: 'rgba(15, 23, 42, 0.75)',
+              border: '1px solid rgba(99, 102, 241, 0.3)',
+              borderRadius: 14,
+            }}
+          >
+            <div
+              style={{
+                position: 'relative',
+                width: 180,
+                height: 135,
+                borderRadius: 10,
+                overflow: 'hidden',
+                background: '#090d16',
+                border: '1px solid rgba(99, 102, 241, 0.4)',
+                flexShrink: 0,
+              }}
+            >
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 6,
+                  left: 6,
+                  background: 'rgba(0, 0, 0, 0.7)',
+                  padding: '2px 6px',
+                  borderRadius: 4,
+                  fontSize: '0.65rem',
+                  color: '#4ade80',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#4ade80' }} />
+                Camera Live
+              </div>
+            </div>
+            <div>
+              <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f1f5f9', marginBottom: 4 }}>
+                Video Interview Mode Active
+              </h4>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                Your webcam is active locally for posture review and authentic interview practice. No video data is recorded or transmitted externally.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Transcript Review and Correction Textarea */}
         <div className="form-group" style={{ marginBottom: 16 }}>
