@@ -73,6 +73,7 @@ export const App: React.FC = () => {
     // Check localStorage for active session
     const savedSessionId = localStorage.getItem('interview_accelerator_active_session');
     if (savedSessionId) {
+      // oxlint-disable-next-line react/set-state-in-effect
       handleResumeSession(savedSessionId);
     }
   }, []);
