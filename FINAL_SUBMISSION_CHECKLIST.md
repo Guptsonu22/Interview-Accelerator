@@ -73,7 +73,7 @@
 - [x] **Question-by-Question Feedback**: Audits candidate answer, turn score, critique, and model STAR answer.
 - [x] **Synthesized Strengths & Weaknesses**: Deduplicated summary of demonstrated competencies and flagged risks.
 - [x] **Prioritized Preparation Plan**: Structured 1-week and 2-week daily study roadmap targeting identified gaps.
-- [x] **Readiness Verdict**: Deterministic rubric (`READY`, `NEAR_READY`, `NEEDS_PRACTICE`).
+- [x] **Readiness Verdict**: Deterministic rubric matching assignment: `STRONG CANDIDATE` ($\ge 85$), `INTERVIEW READY` ($\ge 70$), `NEEDS PREPARATION` ($\ge 50$), `NOT READY` ($< 50$).
 - [x] **Report Export**: Download report in Markdown format or print to PDF.
 
 ---
@@ -113,29 +113,34 @@ To obtain a live public URL for the EDXSO evaluator:
 ---
 
 ### Step 3: Record the Demo Video (3–5 Minutes)
-Record a short screencast (using Loom, OBS Studio, or Windows Game Bar `Win + G`) following this script:
+Record a short screencast on Windows using **Windows Game Bar** (`Win + G`), **OBS Studio**, or **Loom**:
 
-#### Screencast Script (4 Minutes):
-1. **Introduction (30s)**:
-   - State your name and project: *"This is Interview Accelerator, built for the EDXSO Assignment 3 challenge."*
-   - Mention key problem: Candidates fail not from lack of ability, but under-evidenced experience and poor answer structuring.
-2. **Document Intake & Job Fit (45s)**:
-   - Click **"Load Sample Match"** to load a Senior Backend Engineer job description and candidate resume.
-   - Click **"Analyze Job Fit"**.
-   - Show the 5-dimension Job Fit score (e.g. 84/100) and highlight the 🟢 Matched, 🟡 Partial, and 🔴 Missing Evidence tags.
-3. **Voice Interview & Adaptive Follow-Up (2m)**:
+#### Fictional Sample Dataset (For 1-Click or Copy-Paste Demo):
+- **Sample Job Description**: Senior Distributed Systems Engineer at CloudScale Technologies. Requirements: Python, FastAPI, Redis, Distributed Caching, High Concurrency, 3+ years experience.
+- **Sample Candidate Resume**: Alex Rivera, Senior Backend Engineer. Experience: 4 years designing asynchronous microservices in Python/FastAPI, deployed Redis cluster handling 25,000 QPS, BS in Computer Science.
+*(Tip: In the intake screen, you can also simply click the built-in **"Load Sample Match"** button for instant 1-click loading!)*
+
+#### Timestamped Screencast Script (4 Minutes):
+1. **0:00 – 0:30 (Introduction & Problem Statement)**:
+   - Introduce yourself and project: *"Hello, this is Interview Accelerator for EDXSO Assignment 3. The platform solves the problem of under-evidenced candidates by grounding interview questions in target job descriptions, resumes, and dynamic follow-ups."*
+2. **0:30 – 1:15 (Intake & Transparent Job Fit Scoring)**:
+   - Click **"Load Sample Match"** (or paste JD/Resume).
+   - Click **"Analyze Job Fit"**. Show the 5-dimension score breakdown (e.g. 84/100).
+   - Explain the 🟢 Matched, 🟡 Partial, and 🔴 Missing Evidence breakdown. Point out the `Demo Mode (Offline AI)` badge demonstrating zero external dependency.
+3. **1:15 – 3:00 (Voice Interview & Adaptive Follow-Up)**:
    - Click **"Start Interview"** and enter the Interview Room.
-   - Listen to the audio question read aloud via Text-to-Speech (click Replay once).
-   - Click the 🎙️ **Microphone** icon, speak a sample answer aloud, show real-time transcription, and edit a word manually.
-   - Submit a strong answer $\rightarrow$ Show the system probe deeper into high-throughput scaling.
-   - Submit a vague answer $\rightarrow$ Show the system challenge the technical mechanics.
-   - Advance through Level 1, Level 2, and Level 3.
-4. **Diagnostic Report & Export (45s)**:
+   - Listen to the audio question read aloud via Text-to-Speech (click `🔊 Replay Question`).
+   - Click `🎙️ Speak Answer` to demonstrate microphone speech-to-text with the editable transcript review buffer.
+   - Submit a strong technical answer $\rightarrow$ Show the interviewer immediately adapt with an `Advanced System Scaling` probe.
+   - Submit a vague answer $\rightarrow$ Show the interviewer probe the missing technical mechanics.
+   - Advance through Level 1 (Screening) $\rightarrow$ Level 2 (Competency) $\rightarrow$ Level 3 (Deep-Dive).
+4. **3:00 – 4:00 (Diagnostic Report & Markdown Export)**:
    - Complete the interview and view the final report.
-   - Highlight the Overall Score, 7 competency scores, question-by-question breakdown, model answers, and 2-week preparation roadmap.
-   - Click **"Download Markdown"** or **"Print / Save PDF"** to demonstrate report export.
-5. **Conclusion**:
-   - Upload the recording to Loom or YouTube (Unlisted), and paste the link into your submission form.
+   - Show the Overall Score and the deterministic Readiness Verdict (`STRONG CANDIDATE` / `INTERVIEW READY` / `NEEDS PREPARATION` / `NOT READY`).
+   - Review the 7 Core Competency Diagnostics (radar/bar chart), question-level model answers, and the 2-week preparation roadmap.
+   - Click **"Download Markdown"** and **"Print / Save PDF"** to demonstrate report export.
+5. **Conclusion & Wrap-Up**:
+   - Save your video (e.g., in `C:\Users\Sonu\Videos\Captures` if using `Win + G`), upload to Loom or YouTube (Unlisted), and copy the share link into your submission form below.
 
 ---
 
