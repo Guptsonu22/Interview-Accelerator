@@ -49,7 +49,7 @@
 | **V** | **Automated Test Suite & Build** | **PASS** | `pytest -v` passes 24/24 tests in 4.50s; `npm run build` succeeds cleanly in 1.48s; `oxlint` passes with 0 errors and 0 warnings. |
 | **W** | **README & Setup Instructions** | **PASS** | Comprehensive `README.md` containing Windows PowerShell setup commands, system architecture, formulas, quickstart, and screencast guide. |
 | **X** | **Public GitHub Repository** | **PASS** | Configured remote `origin` pointing to `https://github.com/Guptsonu22/Interview-Accelerator.git`, verified reachable via `git ls-remote`. |
-| **Y** | **Publicly Deployed Application** | **BLOCKED** | Application runs locally on `http://127.0.0.1:8000` (FastAPI unified SPA) and `http://127.0.0.1:5173`. Explicitly **NOT DEPLOYED** to public cloud to prevent unauthorized account charges. Dockerfile and cloud deployment guides are provided. |
+| **Y** | **Publicly Deployed Application** | **PASS** | Deployed on Render via Docker and verified live at [`https://interview-accelerator-qt0q.onrender.com`](https://interview-accelerator-qt0q.onrender.com). Health check returns HTTP 200, full E2E candidate flow tested. |
 | **Z** | **Demo Video Screencast** | **PARTIAL** | Minute-by-minute 3–5 minute presentation script provided in `FINAL_SUBMISSION_CHECKLIST.md`. Actual video file is **NOT YET RECORDED** (requires candidate recording session). |
 | **AA**| **Architecture & Evaluation Explanation** | **PASS** | Detailed documentation in `README.md`, `IMPLEMENTATION_PLAN.md`, and `FINAL_DELIVERY_REPORT.md`. |
 
@@ -170,27 +170,25 @@ dist/assets/index-CsGAVr_0.js   289.51 kB │ gzip: 85.50 kB
 
 ## 8. Deployment Status
 
-- **Current Status**: **NOT DEPLOYED TO PUBLIC CLOUD** (Running locally on `http://127.0.0.1:8000` and `http://127.0.0.1:5173`).
-- **Production Artifacts Ready**:
-  - `Dockerfile`: Multi-stage build compiling React frontend and packaging FastAPI into a slim Python 3.11 container.
+- **Current Status**: **VERIFIED LIVE ON PUBLIC CLOUD**
+- **Public URL**: [`https://interview-accelerator-qt0q.onrender.com`](https://interview-accelerator-qt0q.onrender.com)
+- **Health Endpoint**: [`https://interview-accelerator-qt0q.onrender.com/api/health`](https://interview-accelerator-qt0q.onrender.com/api/health) (HTTP 200, database connected)
+- **Production Artifacts**:
+  - `Dockerfile`: Multi-stage build compiling React 19 frontend and packaging FastAPI into a slim Python 3.11 container with dynamic `$PORT` binding.
   - `docker-compose.yml`: Ready for single-command container orchestration.
-- **Recommended Free Cloud Deployment Steps (Render or Railway)**:
-  1. Push repository to your GitHub account: `git push origin main`.
-  2. Log in to [Render](https://render.com) or [Railway](https://railway.app).
-  3. Create a **New Web Service** connected to your repository.
-  4. Select **Docker** environment (or set build command: `cd frontend && npm install && npm run build && cd .. && pip install -r backend/requirements.txt` and start command: `python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT`).
-  5. Set environment variable `LLM_PROVIDER=demo`.
-  6. Deploy service and copy the public HTTPS URL.
+  - `LLM_PROVIDER=demo`: Configured on Render for zero-cost, deterministic, sub-second evaluation response times.
+- **Local Alternative**: Also runs locally on `http://127.0.0.1:8000` (FastAPI unified SPA) and `http://127.0.0.1:5173`.
 
 ---
 
 ## 9. Remaining User Actions for Final Submission
 
 To complete your assignment submission:
-1. **Cloud Deployment (Optional but Recommended)**: Push to GitHub and deploy to Render or Railway using the steps above.
-2. **Demo Video Recording**: Record a 3–5 minute video walkthrough using the minute-by-minute script in `README.md#demo-video-walkthrough-script-35-minutes`.
-3. **Submit Deliverables**:
+1. **GitHub Repository**: Complete and synced with `main`.
+2. **Public Deployment**: Complete and verified live at `https://interview-accelerator-qt0q.onrender.com`.
+3. **Demo Video Recording**: Record a 3–5 minute video walkthrough using the minute-by-minute script in `FINAL_SUBMISSION_CHECKLIST.md` (or `README.md`).
+4. **Submit Deliverables**:
    - GitHub Repository URL: `https://github.com/Guptsonu22/Interview-Accelerator.git`
-   - Live Deployed URL (once deployed on Render/Railway)
-   - Demo Video Link (YouTube / Loom / Google Drive)
+   - Live Deployed URL: `https://interview-accelerator-qt0q.onrender.com`
+   - Demo Video Link: (Your YouTube / Loom / Google Drive link after recording)
    - Final Delivery Report: [FINAL_DELIVERY_REPORT.md](FINAL_DELIVERY_REPORT.md)

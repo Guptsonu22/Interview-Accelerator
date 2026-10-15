@@ -239,16 +239,15 @@ The system implements a unified provider adapter pattern (`backend/services/llm_
 | :--- | :---: | :--- |
 | **Local Dev Servers** | **VERIFIED RUNNING** | Backend on `http://127.0.0.1:8000`, Frontend on `http://127.0.0.1:5173`. |
 | **Local Production Build** | **VERIFIED READY** | Frontend built to `frontend/dist`. Backend configured to mount `dist/` as static assets. |
-| **Docker Multi-Stage Container** | **VERIFIED READY** | `Dockerfile` and `docker-compose.yml` present and configured for unified container deployment. |
-| **Public Cloud Deployment** | **PENDING AUTHORIZATION** | **Not Deployed to Public URL**. Localhost is never a public deployment. Instructions provided below. |
+| **Docker Multi-Stage Container** | **VERIFIED READY** | `Dockerfile` and `docker-compose.yml` configured for dynamic port binding (`--port ${PORT:-8000}`). |
+| **Public Cloud Deployment** | **VERIFIED LIVE** | Deployed on Render at [`https://interview-accelerator-qt0q.onrender.com`](https://interview-accelerator-qt0q.onrender.com). Health check HTTP 200, full E2E flow verified. |
 
-### Steps to Deploy to Render / Railway / Fly.io:
-1. Connect the GitHub repository `https://github.com/Guptsonu22/Interview-Accelerator` to Render or Railway.
-2. Select **Docker** as the environment (it uses the root `Dockerfile`).
-3. Set Environment Variables:
-   - `LLM_PROVIDER=demo` (or add cloud keys)
-   - `PORT=8000`
-4. The service will build both frontend and backend into a single container exposed on port 8000.
+### Verified Live Cloud Configuration (Render):
+1. **GitHub Connection**: Connected to `Guptsonu22/Interview-Accelerator` (`main` branch).
+2. **Environment**: Multi-stage Docker container build.
+3. **Dynamic Port Binding**: Bound dynamically via `CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]`.
+4. **Offline Demo Engine**: Operates via `LLM_PROVIDER=demo` ensuring 100% deterministic, zero-latency, zero-cost execution for evaluators.
+5. **E2E Integration Verification**: Full automated lifecycle verified against live host (Health Check, Document Ingestion, 5-Dimension Job Fit, 3-Level Adaptive Interview, Report & Markdown Export).
 
 ---
 
