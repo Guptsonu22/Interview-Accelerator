@@ -18,7 +18,7 @@
 | **Code Quality / Linter** | Static analysis and type integrity | **VERIFIED** | **0 Errors, 0 Warnings** across 12 files via `npm run lint` (`oxlint`) |
 | **README Documentation** | Architecture, setup, API modes, voice guide, scoring formulas | **VERIFIED** | [`README.md`](README.md) (comprehensive, up to date) |
 | **QA Acceptance Report** | 30-item acceptance matrix and scenario test outcomes | **VERIFIED** | [`FINAL_QA_REPORT.md`](FINAL_QA_REPORT.md) |
-| **Public Live Deployment** | Live web application accessible to evaluators | **PENDING** | **Requires Candidate Cloud Deployment** (local application running at `http://localhost:8000`) |
+| **Public Live Deployment** | Live web application accessible to evaluators | **VERIFIED LIVE** | [`https://interview-accelerator-qt0q.onrender.com`](https://interview-accelerator-qt0q.onrender.com) |
 | **Demo Video (Loom / YouTube)** | Video demonstration of interview session and voice | **PENDING** | **Requires Candidate Screen Recording** (detailed recording script provided below) |
 
 ---

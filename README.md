@@ -30,7 +30,7 @@ Interview Accelerator systematically solves this by parsing target Job Descripti
 | Resource | Status | Verified Destination |
 | :--- | :---: | :--- |
 | **Source Code Repository** | Verified | [`https://github.com/Guptsonu22/Interview-Accelerator.git`](https://github.com/Guptsonu22/Interview-Accelerator.git) |
-| **Public Cloud Deployment** | **NOT DEPLOYED (Pending Authorization)** | Runs locally at `http://127.0.0.1:8000` and `http://127.0.0.1:5173`. Cloud deployment steps are documented in [Section 17](#17-public-deployment-instructions-and-status). |
+| **Public Cloud Deployment** | **Verified LIVE** | [`https://interview-accelerator-qt0q.onrender.com`](https://interview-accelerator-qt0q.onrender.com) |
 | **Backend Test Suite** | **24/24 Passed (100%)** | Verified via `python -m pytest -v` (Exit Code: 0, 4.50s execution). |
 | **Frontend Production Build** | **Clean Build** | Verified via `npm run build` in `frontend/` (Exit Code: 0, 1.29s build). |
 | **Default AI Execution Mode** | **Offline Deterministic** | Runs locally with zero paid API dependencies via `DemoProvider`. |
@@ -366,17 +366,18 @@ docker-compose up --build
 
 ## 17. Public Deployment Instructions and Status
 
-> **Current Status**: **NOT DEPLOYED (Pending Authorization)**  
-> The application runs locally on verified ports `8000` and `5173`. Deployment to a public host requires personal cloud provider account authorization.
+> **Current Status**: **Verified LIVE on Cloud**  
+> The application is continuously deployed and accessible at:  
+> **[`https://interview-accelerator-qt0q.onrender.com`](https://interview-accelerator-qt0q.onrender.com)**  
+>
+> Evaluators can immediately test the full application, Job Fit scoring, adaptive voice interview room, and report exports with zero setup.
 
-### Recommended Free-Tier Deployment (Render)
-1. Push this repository to GitHub: `git push origin main`.
-2. Sign in to [Render](https://render.com) and click **New Web Service**.
-3. Connect your GitHub repository.
-4. Select **Docker** as the environment.
-5. Set the environment variable: `LLM_PROVIDER=demo`.
-6. Add an optional persistent disk at `/app/data` if persistent SQLite sessions across container reboots are desired.
-7. Click **Create Web Service** to launch your live public URL.
+### Public Deployment Configuration (Render)
+1. **Repository**: Connected to GitHub repository `Guptsonu22/Interview-Accelerator` (`main` branch).
+2. **Environment**: Multi-stage `Dockerfile` with dynamic port binding (`uvicorn ... --port ${PORT:-8000}`).
+3. **Runtime Engine**: `LLM_PROVIDER=demo` (provides instant, deterministic, zero-cost AI evaluations without requiring third-party API keys).
+4. **Health Check Endpoint**: Verified HTTP 200 at [`https://interview-accelerator-qt0q.onrender.com/api/health`](https://interview-accelerator-qt0q.onrender.com/api/health).
+5. **Local Execution Alternative**: Application can also run locally on `http://127.0.0.1:8000` via Docker or standard Python/Node setup.
 
 ---
 
