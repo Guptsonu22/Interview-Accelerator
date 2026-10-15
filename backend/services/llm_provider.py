@@ -293,25 +293,34 @@ class DemoProvider(LLMProvider):
                     "difficulty": "standard"
                 }
 
-            # 2. Candidate gave an empty or irrelevant answer
-            if answer_type == "irrelevant_or_empty" or next_action == "refocus":
+            # 2. Candidate gave an empty answer
+            if answer_type == "empty" or next_action == "prompt_simplification":
                 return {
-                    "question_text": f"Your previous response didn't provide enough technical detail regarding {last_q_category}. To properly assess your competency for this {role_title} role, could you walk me through how you would practically implement {last_q_category} in a production environment?",
+                    "question_text": f"To properly evaluate your engineering approach for this {role_title} position, could you walk me through a foundational concept: how would you structure a basic REST endpoint and its automated tests in a production setting?",
+                    "question_category": "Prompt Clarification & Simplification",
+                    "target_competency": "Technical Knowledge",
+                    "difficulty": "standard"
+                }
+
+            # 3. Candidate gave an irrelevant answer (off-topic)
+            if answer_type == "irrelevant" or answer_type == "irrelevant_or_empty" or next_action == "refocus":
+                return {
+                    "question_text": f"Your previous response didn't provide technical detail regarding {last_q_category}. To assess your competency for this {role_title} role, could you walk me through how you would practically implement {last_q_category} in a production environment?",
                     "question_category": "Core Competency Refocus",
                     "target_competency": "Technical Knowledge",
                     "difficulty": "standard"
                 }
 
-            # 3. Candidate gave a vague answer
-            if answer_type == "vague" or next_action == "probe_vagueness":
+            # 4. Candidate gave an incorrect technical answer or misconception
+            if answer_type == "incorrect" or next_action == "probe_misconception":
                 return {
-                    "question_text": f"In your last response regarding {last_q_category}, you outlined a high-level approach but didn't specify the underlying mechanics. Could you drill into the exact data structures, libraries, or protocols you used, and what specific trade-offs guided that choice?",
-                    "question_category": "Technical Mechanics Probe",
-                    "target_competency": "Depth of Understanding",
+                    "question_text": f"Let's explore that technical concept further. In production protocols, how do the reliability, ordering, and consistency guarantees differ from what was described, and what failure modes would arise under stress?",
+                    "question_category": "Technical Precision & Diagnostic Correction",
+                    "target_competency": "Technical Knowledge",
                     "difficulty": "challenging"
                 }
 
-            # 4. Candidate made an unevidenced or contradictory claim
+            # 5. Candidate made an unevidenced or contradictory claim
             if answer_type == "contradiction" or next_action == "probe_contradiction":
                 return {
                     "question_text": f"You mentioned an extensive contribution that seems to stand out from your documented project scope. Could you clarify your specific individual architectural decisions and code contributions versus the pre-existing libraries or team components?",
@@ -320,7 +329,43 @@ class DemoProvider(LLMProvider):
                     "difficulty": "challenging"
                 }
 
-            # 5. Candidate gave a strong, detailed answer
+            # 6. Candidate demonstrated a genuine knowledge gap in distributed systems
+            if answer_type == "knowledge_gap" or next_action == "bridge_knowledge_gap":
+                return {
+                    "question_text": f"You described working effectively with a single-node deployment. If your team now needed to migrate {topic_anchor} to high-availability clustering with automatic failover, what replication topology and split-brain defenses would you design?",
+                    "question_category": "Architectural Scaling Transition",
+                    "target_competency": "Problem Solving",
+                    "difficulty": "challenging"
+                }
+
+            # 7. Candidate gave a short but technically correct answer
+            if answer_type == "concise_correct" or next_action == "probe_expansion":
+                return {
+                    "question_text": f"That was a concise and accurate breakdown of {topic_anchor}. To go deeper into the engineering trade-offs: what cache eviction or data invalidation policy would you configure, and how do you guarantee read-after-write consistency?",
+                    "question_category": "Technical Deepening & Edge Cases",
+                    "target_competency": "Depth of Understanding",
+                    "difficulty": "challenging"
+                }
+
+            # 8. Candidate gave an answer that only partially addressed the question
+            if answer_type == "partial" or next_action == "probe_missing_aspect":
+                return {
+                    "question_text": f"In your last response, you addressed the application logic, but skipped the database failover and resilience strategy. How would your architecture handle a sudden database outage without dropping requests?",
+                    "question_category": "System Reliability & Missing Aspects",
+                    "target_competency": "Problem Solving",
+                    "difficulty": "challenging"
+                }
+
+            # 9. Candidate gave a vague answer
+            if answer_type == "vague" or next_action == "probe_vagueness":
+                return {
+                    "question_text": f"In your last response regarding {last_q_category}, you outlined a high-level approach but didn't specify the underlying mechanics. Could you drill into the exact data structures, libraries, or protocols you used, and what specific trade-offs guided that choice?",
+                    "question_category": "Technical Mechanics Probe",
+                    "target_competency": "Depth of Understanding",
+                    "difficulty": "challenging"
+                }
+
+            # 10. Candidate gave a strong, detailed answer
             if answer_type == "strong" or next_action == "probe_deeper":
                 return {
                     "question_text": f"That was a strong, structured breakdown of {topic_anchor}. Let's take it a step further: under extreme load where traffic increases 50x and network latency spikes, what is the single point of failure in that architecture, and how would you redesign it for high availability?",
@@ -329,7 +374,7 @@ class DemoProvider(LLMProvider):
                     "difficulty": "challenging"
                 }
 
-            # 6. Fallback if score was low and missing concepts exist
+            # Fallback if score was low and missing concepts exist
             last_score = last_eval.get("score", 75)
             last_missing = last_eval.get("missing_concepts", [])
             if last_score < 60 and last_missing:
