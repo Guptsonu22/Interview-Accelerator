@@ -3,7 +3,7 @@
 > AI-assisted technical and behavioral interview preparation engine with grounded document analysis, explainable job fit scoring, adaptive follow-up questioning, voice interaction, and comprehensive diagnostic reporting.  
 > *Developed for EDXSO Assignment 3: AI Product Engineer Intern Challenge.*
 
-[![Test Suite](https://img.shields.io/badge/Pytest-17%2F17%20Passed-brightgreen?style=flat-square)](backend/tests)
+[![Test Suite](https://img.shields.io/badge/Pytest-24%2F24%20Passed-brightgreen?style=flat-square)](backend/tests)
 [![Frontend Build](https://img.shields.io/badge/Frontend-Vite%208%20%7C%20React%2019-blue?style=flat-square)](frontend)
 [![Default Engine](https://img.shields.io/badge/Default%20AI-Offline%20Demo%20Mode-success?style=flat-square)](#8-ai-provider-modes-and-configuration)
 [![Voice Interface](https://img.shields.io/badge/Voice-Web%20Speech%20API-orange?style=flat-square)](#9-voice-interaction-and-compatibility)
@@ -31,7 +31,7 @@ Interview Accelerator systematically solves this by parsing target Job Descripti
 | :--- | :---: | :--- |
 | **Source Code Repository** | Verified | [`https://github.com/Guptsonu22/Interview-Accelerator.git`](https://github.com/Guptsonu22/Interview-Accelerator.git) |
 | **Public Cloud Deployment** | **NOT DEPLOYED (Pending Authorization)** | Runs locally at `http://127.0.0.1:8000` and `http://127.0.0.1:5173`. Cloud deployment steps are documented in [Section 17](#17-public-deployment-instructions-and-status). |
-| **Backend Test Suite** | **17/17 Passed (100%)** | Verified via `python -m pytest -v` (Exit Code: 0, 4.41s execution). |
+| **Backend Test Suite** | **24/24 Passed (100%)** | Verified via `python -m pytest -v` (Exit Code: 0, 4.50s execution). |
 | **Frontend Production Build** | **Clean Build** | Verified via `npm run build` in `frontend/` (Exit Code: 0, 1.29s build). |
 | **Default AI Execution Mode** | **Offline Deterministic** | Runs locally with zero paid API dependencies via `DemoProvider`. |
 | **Evaluator Audit Documentation** | Verified | [README_AUDIT_REPORT.md](README_AUDIT_REPORT.md), [FINAL_AUDIT_REPORT.md](FINAL_AUDIT_REPORT.md), and [FINAL_DELIVERY_REPORT.md](FINAL_DELIVERY_REPORT.md). |
@@ -345,8 +345,8 @@ Configure application settings in `.env` (copied from `.env.example`):
 ```powershell
 python -m pytest -v
 ```
-**Outcome**: **17 passed in 4.41s** (Exit Code: 0).  
-Validates document ingestion, security filters, 5-dimension Job Fit mathematics, edge cases (empty resumes, unrelated candidates), 3-level interview state progression, 5 adaptive follow-up response scenarios, and cloud LLM fallback.
+**Outcome**: **24 passed in 4.50s** (Exit Code: 0).  
+Validates document ingestion, corrupt PDF/DOCX parsing, path traversal sanitization, oversized file rejection, prompt injection detection variants, multipart uploads, 5-dimension Job Fit mathematics, boundary edge cases (empty resumes, unrelated profiles), cross-profile analysis and question divergence, 3-level interview state progression, all 10 adaptive follow-up response scenarios, markdown report export, and cloud LLM fallback.
 
 ### Frontend Production Build
 ```powershell
