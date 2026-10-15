@@ -62,7 +62,8 @@ class DemoProvider(LLMProvider):
         "node.js", "fastapi", "django", "flask", "express", "go", "golang", "rust", "java", "c++",
         "c#", ".net", "sql", "postgresql", "mysql", "sqlite", "mongodb", "redis", "docker",
         "kubernetes", "aws", "azure", "gcp", "git", "github", "ci/cd", "rest", "graphql", "grpc",
-        "html", "css", "tailwind", "linux", "bash", "agile", "scrum", "pydantic", "pytest", "unit testing"
+        "html", "css", "tailwind", "linux", "bash", "agile", "scrum", "pydantic", "pytest", "unit testing",
+        "swift", "swiftui", "combine", "coredata", "kotlin", "spark", "kafka", "snowflake", "airflow"
     ]
 
     COMMON_SOFT_SKILLS = [
