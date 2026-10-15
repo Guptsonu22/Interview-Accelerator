@@ -131,12 +131,12 @@ async def test_distinct_profiles_produce_different_analysis_and_questions():
     provider = DemoProvider()
 
     # Profile A: iOS Mobile Engineer
-    jd_ios = "Job Title: Senior iOS Engineer\nCompany: SwiftMobile\nRequirements: Swift, SwiftUI, Combine, CoreData."
-    resume_ios = "Elena Rostova\nMobile Engineer\nSkills: Swift, SwiftUI, Combine, iOS.\nProjects: HealthTracker iOS App."
+    jd_ios = "Job Title: Senior iOS Engineer\nCompany: SwiftMobile\nResponsibilities:\n- Design iOS applications in Swift and SwiftUI.\n- Architect local storage using CoreData.\nRequirements: Swift, SwiftUI, Combine, CoreData.\nPreferred: Fastlane."
+    resume_ios = "Elena Rostova\nMobile Engineer\nSkills: Swift, SwiftUI, Combine, iOS, CoreData.\nExperience: Senior iOS Developer at MobileCo (3 years).\nProjects: HealthTracker iOS App built with Swift.\nEducation: B.S. in Computer Science."
 
     # Profile B: Data Platform Engineer
-    jd_data = "Job Title: Data Platform Engineer\nCompany: DataLake Inc\nRequirements: Apache Spark, Kafka, Snowflake, Python."
-    resume_data = "Marcus Vance\nData Engineer\nSkills: Apache Spark, Kafka, Snowflake, Python, SQL.\nProjects: Real-time Streaming Pipeline."
+    jd_data = "Job Title: Data Platform Engineer\nCompany: DataLake Inc\nResponsibilities:\n- Build real-time streaming with Apache Spark and Kafka.\n- Maintain Snowflake data warehouses.\nRequirements: Apache Spark, Kafka, Snowflake, Python, SQL.\nPreferred: Airflow."
+    resume_data = "Marcus Vance\nData Engineer\nSkills: Apache Spark, Kafka, Snowflake, Python, SQL.\nExperience: Data Engineer at DataCorp (4 years).\nProjects: Real-time Streaming Pipeline with Kafka.\nEducation: M.S. in Data Engineering."
 
     job_ios = await provider.analyze_job(jd_ios)
     cand_ios = await provider.analyze_resume(resume_ios)
@@ -153,9 +153,10 @@ async def test_distinct_profiles_produce_different_analysis_and_questions():
     assert "Data Platform Engineer" in job_data["role_title"]
     assert job_ios["role_title"] != job_data["role_title"]
 
-    assert fit_ios["overall_score"] >= 60
-    assert fit_data["overall_score"] >= 60
+    assert fit_ios["overall_score"] >= 65
+    assert fit_data["overall_score"] >= 65
     assert cross_fit["overall_score"] < 40  # Swift engineer in Data platform role has low fit
+    assert fit_ios["overall_score"] > cross_fit["overall_score"]
 
     # Compare generated questions
     q_ios = await provider.generate_question({
