@@ -120,3 +120,57 @@ async def test_job_fit_edge_cases_empty_and_unrelated():
     assert unrelated_fit["overall_score"] < 25
     assert unrelated_fit["required_skills_score"] == 0
     assert len(unrelated_fit["missing_skills"]) >= len(job["required_skills"])
+
+
+@pytest.mark.asyncio
+async def test_distinct_profiles_produce_different_analysis_and_questions():
+    """
+    Verifies that substantially different JD/resume pairs (e.g. Mobile iOS vs Data Platform)
+    produce distinct analysis results, different job fit scores, and tailored questions.
+    """
+    provider = DemoProvider()
+
+    # Profile A: iOS Mobile Engineer
+    jd_ios = "Job Title: Senior iOS Engineer\nCompany: SwiftMobile\nRequirements: Swift, SwiftUI, Combine, CoreData."
+    resume_ios = "Elena Rostova\nMobile Engineer\nSkills: Swift, SwiftUI, Combine, iOS.\nProjects: HealthTracker iOS App."
+
+    # Profile B: Data Platform Engineer
+    jd_data = "Job Title: Data Platform Engineer\nCompany: DataLake Inc\nRequirements: Apache Spark, Kafka, Snowflake, Python."
+    resume_data = "Marcus Vance\nData Engineer\nSkills: Apache Spark, Kafka, Snowflake, Python, SQL.\nProjects: Real-time Streaming Pipeline."
+
+    job_ios = await provider.analyze_job(jd_ios)
+    cand_ios = await provider.analyze_resume(resume_ios)
+    fit_ios = JobFitService.calculate_job_fit(job_ios, cand_ios)
+
+    job_data = await provider.analyze_job(jd_data)
+    cand_data = await provider.analyze_resume(resume_data)
+    fit_data = JobFitService.calculate_job_fit(job_data, cand_data)
+
+    # Cross-match: Elena applying for Data Platform should have a low score
+    cross_fit = JobFitService.calculate_job_fit(job_data, cand_ios)
+
+    assert "Senior iOS Engineer" in job_ios["role_title"]
+    assert "Data Platform Engineer" in job_data["role_title"]
+    assert job_ios["role_title"] != job_data["role_title"]
+
+    assert fit_ios["overall_score"] >= 60
+    assert fit_data["overall_score"] >= 60
+    assert cross_fit["overall_score"] < 40  # Swift engineer in Data platform role has low fit
+
+    # Compare generated questions
+    q_ios = await provider.generate_question({
+        "interview_level": "competency",
+        "turn_index": 0,
+        "job_analysis": job_ios,
+        "candidate_analysis": cand_ios
+    })
+    q_data = await provider.generate_question({
+        "interview_level": "competency",
+        "turn_index": 0,
+        "job_analysis": job_data,
+        "candidate_analysis": cand_data
+    })
+
+    assert q_ios["question_text"] != q_data["question_text"]
+    assert "swift" in q_ios["question_text"].lower() or "mobile" in q_ios["question_text"].lower() or "architecture" in q_ios["question_text"].lower()
+    assert "spark" in q_data["question_text"].lower() or "kafka" in q_data["question_text"].lower() or "architecture" in q_data["question_text"].lower()
