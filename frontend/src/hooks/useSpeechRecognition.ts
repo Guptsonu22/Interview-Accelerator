@@ -21,11 +21,18 @@ export interface UseSpeechRecognitionReturn {
 }
 
 export function useSpeechRecognition(): UseSpeechRecognitionReturn {
-  const [isSupported, setIsSupported] = useState<boolean>(false);
+  const [isSupported] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return Boolean(window.SpeechRecognition || (window as any).webkitSpeechRecognition);
+  });
   const [isListening, setIsListening] = useState<boolean>(false);
   const [transcript, setTranscript] = useState<string>('');
   const [interimTranscript, setInterimTranscript] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const hasApi = Boolean(window.SpeechRecognition || (window as any).webkitSpeechRecognition);
+    return hasApi ? null : 'Web Speech Recognition is not supported in this browser. Please use Chrome, Edge, or use the text fallback.';
+  });
 
   const recognitionRef = useRef<any>(null);
 
@@ -34,7 +41,6 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognitionAPI) {
-      setIsSupported(true);
       const recognizer = new SpeechRecognitionAPI();
       recognizer.continuous = true;
       recognizer.interimResults = true;
@@ -81,9 +87,6 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
       };
 
       recognitionRef.current = recognizer;
-    } else {
-      setIsSupported(false);
-      setError('Web Speech Recognition is not supported in this browser. Please use Chrome, Edge, or use the text fallback.');
     }
 
     return () => {
@@ -103,12 +106,12 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     }
     try {
       recognitionRef.current.start();
-    } catch (e: any) {
+    } catch {
       // In case it was already active
       try {
         recognitionRef.current.stop();
-        setTimeout(() => recognitionRef.current.start(), 200);
-      } catch (err) {
+        setTimeout(() => recognitionRef.current?.start(), 200);
+      } catch {
         setError('Could not start microphone session.');
       }
     }

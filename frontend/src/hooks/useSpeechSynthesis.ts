@@ -16,7 +16,9 @@ export interface UseSpeechSynthesisReturn {
 }
 
 export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
-  const [isSupported, setIsSupported] = useState<boolean>(false);
+  const [isSupported] = useState<boolean>(
+    () => typeof window !== 'undefined' && 'speechSynthesis' in window
+  );
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
@@ -27,28 +29,28 @@ export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      setIsSupported(true);
       synthRef.current = window.speechSynthesis;
 
       const updateVoices = () => {
         const available = window.speechSynthesis.getVoices();
         setVoices(available);
-        if (available.length > 0 && !selectedVoice) {
-          // Prefer English natural voices
-          const preferred =
-            available.find((v) => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('David') || v.name.includes('Samantha'))) ||
-            available.find((v) => v.lang.startsWith('en')) ||
-            available[0];
-          setSelectedVoice(preferred);
-        }
+        setSelectedVoice((current) => {
+          if (available.length > 0 && !current) {
+            // Prefer English natural voices
+            const preferred =
+              available.find((v) => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('David') || v.name.includes('Samantha'))) ||
+              available.find((v) => v.lang.startsWith('en')) ||
+              available[0];
+            return preferred;
+          }
+          return current;
+        });
       };
 
       updateVoices();
       if (window.speechSynthesis.onvoiceschanged !== undefined) {
         window.speechSynthesis.onvoiceschanged = updateVoices;
       }
-    } else {
-      setIsSupported(false);
     }
 
     return () => {

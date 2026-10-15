@@ -53,12 +53,13 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
     if (currentTurn?.question_text && !speechSynthesis.isMuted) {
       speechSynthesis.speak(currentTurn.question_text);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTurn?.id]);
 
   // Sync speech recognition transcript into candidate answer text
   useEffect(() => {
     if (speechRecognition.transcript) {
-      setAnswerText(speechRecognition.transcript);
+      setAnswerText((prev) => (prev !== speechRecognition.transcript ? speechRecognition.transcript : prev));
     }
   }, [speechRecognition.transcript]);
 

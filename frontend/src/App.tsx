@@ -33,6 +33,35 @@ export const App: React.FC = () => {
   const [candidateName, setCandidateName] = useState<string>('');
   const [report, setReport] = useState<PerformanceReport | null>(null);
 
+  const loadRecentSessions = () => {
+    api.listRecentSessions()
+      .then((s) => setRecentSessions(s))
+      .catch((err) => console.warn('Could not load recent sessions:', err));
+  };
+
+  const handleResumeSession = async (sessionId: string) => {
+    try {
+      const detail = await api.getSessionDetail(sessionId);
+      setSession(detail.session);
+      setRoleTitle(detail.role_title || 'Software Role');
+      setCandidateName(detail.candidate_name || 'Candidate');
+
+      if (detail.session.status === 'completed') {
+        const rep = await api.getReport(sessionId);
+        setReport(rep);
+        setCurrentView('report');
+      } else {
+        if (detail.current_turn) {
+          setCurrentTurn(detail.current_turn);
+        }
+        setCurrentView('interview');
+      }
+    } catch (err) {
+      console.warn('Could not restore session:', err);
+      localStorage.removeItem('interview_accelerator_active_session');
+    }
+  };
+
   // Initial load: health check & recent sessions
   useEffect(() => {
     api.getHealth()
@@ -47,12 +76,6 @@ export const App: React.FC = () => {
       handleResumeSession(savedSessionId);
     }
   }, []);
-
-  const loadRecentSessions = () => {
-    api.listRecentSessions()
-      .then((s) => setRecentSessions(s))
-      .catch((err) => console.warn('Could not load recent sessions:', err));
-  };
 
   const handleAnalysisComplete = (
     _jDoc: DocumentRecord,
@@ -91,28 +114,6 @@ export const App: React.FC = () => {
     loadRecentSessions();
   };
 
-  const handleResumeSession = async (sessionId: string) => {
-    try {
-      const detail = await api.getSessionDetail(sessionId);
-      setSession(detail.session);
-      setRoleTitle(detail.role_title || 'Software Role');
-      setCandidateName(detail.candidate_name || 'Candidate');
-
-      if (detail.session.status === 'completed') {
-        const rep = await api.getReport(sessionId);
-        setReport(rep);
-        setCurrentView('report');
-      } else {
-        if (detail.current_turn) {
-          setCurrentTurn(detail.current_turn);
-        }
-        setCurrentView('interview');
-      }
-    } catch (err) {
-      console.warn('Could not restore session:', err);
-      localStorage.removeItem('interview_accelerator_active_session');
-    }
-  };
 
   const handleReset = () => {
     if (currentView === 'interview' && session?.status !== 'completed') {
