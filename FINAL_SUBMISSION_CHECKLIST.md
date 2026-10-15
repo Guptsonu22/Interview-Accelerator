@@ -78,41 +78,23 @@
 
 ---
 
-## 3. Required Manual Steps Before Submission
+## 3. Deployment Status & Remaining Action (Demo Video)
 
-Because an automated agent cannot access external personal cloud accounts or physical microphones, the following 3 manual steps must be completed by you:
-
-### Step 1: Git Push to GitHub
-Your local repository is clean and ahead by 1 commit. To push your latest changes to GitHub:
-```powershell
-git push origin main
-```
-*Verify that your repository at `https://github.com/Guptsonu22/Interview-Accelerator` displays the updated README, test badge (24/24 passed), and report files.*
+### Step 1: Git Repository (Completed & Up to Date)
+The source repository is published at:
+`https://github.com/Guptsonu22/Interview-Accelerator.git`
 
 ---
 
-### Step 2: Public Cloud Deployment (Render / Railway / Fly.io)
-To obtain a live public URL for the EDXSO evaluator:
-
-1. **Deploying on Render (Free / Fast)**:
-   - Go to [dashboard.render.com](https://dashboard.render.com/) and click **New + $\rightarrow$ Web Service**.
-   - Connect your GitHub repository: `Guptsonu22/Interview-Accelerator`.
-   - Environment: Select **Docker** (it uses the root `Dockerfile`).
-   - Region: Select nearest region (e.g., Oregon or Frankfurt).
-   - Instance Type: **Free**.
-   - Environment Variables:
-     - `LLM_PROVIDER`: `demo`
-     - `PORT`: `8000`
-   - Click **Deploy Web Service**.
-   - Copy the generated URL (e.g., `https://interview-accelerator.onrender.com`).
-
-2. **Test the Public URL**:
-   - Open `https://<your-service>.onrender.com/api/health` in your browser. Verify it returns `{"status":"ok"}`.
-   - Open `https://<your-service>.onrender.com/` and test document intake and Job Fit calculation.
+### Step 2: Public Cloud Deployment (Completed & Verified LIVE)
+The production application has been deployed on Render via Docker and is **Verified LIVE**:
+- **Application URL**: [`https://interview-accelerator-qt0q.onrender.com`](https://interview-accelerator-qt0q.onrender.com)
+- **Health Check**: [`https://interview-accelerator-qt0q.onrender.com/api/health`](https://interview-accelerator-qt0q.onrender.com/api/health) (HTTP 200 `status: ok`)
+- **Verified Capabilities**: Document parsing, 5-dimension Job Fit calculation, 3-level adaptive interview room, candidate webcam simulation tile, and report generation/markdown export.
 
 ---
 
-### Step 3: Record the Demo Video (3–5 Minutes)
+### Step 3: Record the Demo Video (3–5 Minutes — Pending Candidate Screencast)
 Record a short screencast on Windows using **Windows Game Bar** (`Win + G`), **OBS Studio**, or **Loom**:
 
 #### Fictional Sample Dataset (For 1-Click or Copy-Paste Demo):
@@ -153,8 +135,8 @@ Copy and paste this completed template into your EDXSO assignment submission por
 
 **Candidate**: Sonu Gupta
 **GitHub Repository**: https://github.com/Guptsonu22/Interview-Accelerator.git
-**Live Application URL**: https://<your-deployed-render-url>.onrender.com  *(Replace with your live URL after Step 2)*
-**Demo Video URL**: https://www.loom.com/share/<your-loom-id>  *(Replace with your video link after Step 3)*
+**Live Application URL**: https://interview-accelerator-qt0q.onrender.com
+**Demo Video URL**: https://www.loom.com/share/<your-loom-id>  *(Replace with your video link after recording)*
 
 #### Key Achievements:
 - 24/24 automated backend tests passing with 100% code integrity.
