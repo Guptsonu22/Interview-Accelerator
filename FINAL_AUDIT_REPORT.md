@@ -44,13 +44,13 @@
 | **Q** | **Readiness Label & Preparation Plan** | **PASS** | Deterministic rating thresholds: `STRONG CANDIDATE` (≥85 & floors ≥70), `INTERVIEW READY` (≥70 & floors ≥55), `NEEDS PREPARATION` (≥50), `NOT READY` (<50). Prioritized 3-tier preparation plan with topics, rationale, drills, and completion criteria. |
 | **R** | **Report Export** | **PASS** | Clean Markdown export via `/api/reports/{id}/export?format=markdown` (`#btn-download-markdown`) and browser Print-to-PDF formatting (`#btn-print-report`). |
 | **S** | **Responsive, High-Craft UI** | **PASS** | Modern glassmorphic theme in `frontend/src/index.css` using Space Grotesk and Inter fonts, pulsing mic waveforms, mobile and desktop responsive layouts, loading states, and zero dead buttons. |
-| **T** | **Backend & API Reliability** | **PASS** | FastAPI with Pydantic v2 validation, global safe error handler, CORS middleware, and clean lifespan startup. 17/17 automated Pytests passing. |
-| **U** | **Input Security & Privacy** | **PASS** | Prompt injection pattern detection in `backend/core/security.py`, MIME validation, 10MB upload limits, local SQLite storage with WAL mode, and no external client data leakage. |
-| **V** | **Automated Test Suite & Build** | **PASS** | `pytest -v` passes 17/17 tests in 5.15s; `npm run build` succeeds cleanly in 1.29s (`dist/assets/index-CUOouVli.js` 289 kB). |
+| **T** | **Backend & API Reliability** | **PASS** | FastAPI with Pydantic v2 validation, global safe error handler, CORS middleware, and clean lifespan startup. 24/24 automated Pytests passing. |
+| **U** | **Input Security & Privacy** | **PASS** | Prompt injection pattern detection in `backend/core/security.py`, MIME validation, 10MB upload limits, path traversal sanitization, local SQLite storage with WAL mode, and no external client data leakage. |
+| **V** | **Automated Test Suite & Build** | **PASS** | `pytest -v` passes 24/24 tests in 4.50s; `npm run build` succeeds cleanly in 1.48s; `oxlint` passes with 0 errors and 0 warnings. |
 | **W** | **README & Setup Instructions** | **PASS** | Comprehensive `README.md` containing Windows PowerShell setup commands, system architecture, formulas, quickstart, and screencast guide. |
 | **X** | **Public GitHub Repository** | **PASS** | Configured remote `origin` pointing to `https://github.com/Guptsonu22/Interview-Accelerator.git`, verified reachable via `git ls-remote`. |
 | **Y** | **Publicly Deployed Application** | **BLOCKED** | Application runs locally on `http://127.0.0.1:8000` (FastAPI unified SPA) and `http://127.0.0.1:5173`. Explicitly **NOT DEPLOYED** to public cloud to prevent unauthorized account charges. Dockerfile and cloud deployment guides are provided. |
-| **Z** | **Demo Video Screencast** | **PARTIAL** | Minute-by-minute 3–5 minute presentation script provided in `README.md`. Actual video file is **NOT YET RECORDED** (requires candidate recording session). |
+| **Z** | **Demo Video Screencast** | **PARTIAL** | Minute-by-minute 3–5 minute presentation script provided in `FINAL_SUBMISSION_CHECKLIST.md`. Actual video file is **NOT YET RECORDED** (requires candidate recording session). |
 | **AA**| **Architecture & Evaluation Explanation** | **PASS** | Detailed documentation in `README.md`, `IMPLEMENTATION_PLAN.md`, and `FINAL_DELIVERY_REPORT.md`. |
 
 ---
@@ -60,14 +60,16 @@
 ### Backend Test Execution
 ```powershell
 Command: .\python.cmd -m pytest -v
-Result: 17 passed in 5.15s (Exit Code: 0)
+Result: 24 passed in 4.50s (Exit Code: 0)
 ```
 - ✅ `test_job_analysis_extraction`: Validates JD parsing, title, company, skills.
 - ✅ `test_candidate_analysis_extraction`: Validates resume parsing, projects, metrics.
 - ✅ `test_job_fit_deterministic_calculation`: Validates 5-dimension scoring and reproducibility.
 - ✅ `test_job_fit_edge_cases_empty_and_unrelated`: Validates 0-score baseline for empty resumes and low scoring for unrelated candidates.
+- ✅ `test_distinct_profiles_produce_different_analysis_and_questions`: Validates cross-profile divergence for iOS vs Data Platform roles.
 - ✅ `test_health_endpoint`: Validates `/api/health` and SQLite DB connectivity.
 - ✅ `test_document_paste_and_analysis_api`: Tests end-to-end HTTP intake and analysis.
+- ✅ `test_api_error_handling_and_file_upload`: Tests multipart upload, 404/422 validation handling, and markdown report export.
 - ✅ `test_sanitize_text`: Validates text normalization and character cleaning.
 - ✅ `test_validate_file_upload_valid`: Checks valid PDF and DOCX uploads.
 - ✅ `test_validate_file_upload_invalid_ext`: Rejects unauthorized file extensions (.exe, .sh).
@@ -76,19 +78,30 @@ Result: 17 passed in 5.15s (Exit Code: 0)
 - ✅ `test_parse_text_bytes`: Validates UTF-8 raw text extraction.
 - ✅ `test_parse_docx_bytes`: Tests Word document binary stream extraction.
 - ✅ `test_parse_file_too_short`: Rejects insufficient input content.
-- ✅ `test_interview_full_flow`: Validates full 3-turn interview session, dynamic question transitions, answer evaluation, 7-competency aggregation, and performance report generation.
-- ✅ `test_adaptive_questioning_all_candidate_scenarios`: Validates dynamic follow-ups for strong, vague, dont-know, contradictory, and empty responses.
+- ✅ `test_corrupt_pdf_handling`: Handles malformed PDF headers safely without crashing.
+- ✅ `test_corrupt_docx_handling`: Handles corrupted ZIP containers safely.
+- ✅ `test_path_traversal_sanitization`: Sanitizes path traversal sequences in filenames.
+- ✅ `test_validate_oversized_file`: Rejects payloads exceeding 10MB with HTTP 413.
+- ✅ `test_advanced_prompt_injection_patterns`: Detects DAN jailbreak strings and instruction delimiters.
+- ✅ `test_interview_full_flow`: Validates full 3-turn interview session across Levels 1, 2, and 3, dynamic question transitions, answer evaluation, 7-competency aggregation, and performance report generation.
+- ✅ `test_adaptive_questioning_all_candidate_scenarios`: Validates dynamic follow-ups for all 10 candidate response patterns (strong, vague, incorrect, dont-know, contradiction, irrelevant, empty, concise-correct, partial, knowledge-gap).
 - ✅ `test_external_llm_provider_fallback_handling`: Validates safe fallback to DemoProvider when external API keys are missing or network errors occur.
+
+### Frontend Linter Execution
+```powershell
+Command: npm run lint (in frontend/)
+Result: Exit Code 0 in 113ms (Found 0 warnings and 0 errors on 12 files)
+```
 
 ### Frontend Production Build Execution
 ```powershell
 Command: npm run build (in frontend/)
-Result: Exit Code 0 in 1.29s
+Result: Exit Code 0 in 1.48s
 Output:
 dist/index.html                   1.23 kB │ gzip:  0.69 kB
 dist/assets/index-Bb9hAuvi.css    6.45 kB │ gzip:  2.02 kB
-dist/assets/index-CUOouVli.js   289.33 kB │ gzip: 85.48 kB
-✓ built in 1.29s
+dist/assets/index-CsGAVr_0.js   289.51 kB │ gzip: 85.50 kB
+✓ built in 1.48s
 ```
 
 ---
