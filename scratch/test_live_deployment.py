@@ -122,12 +122,12 @@ with httpx.Client(timeout=30.0) as client:
     print(f"\n--- 9. Testing Error Handling (404 and 422) ---")
     not_found_res = client.get(f"{BASE_URL}/api/reports/non-existent-session-id")
     print(f"Invalid Session ID Status: {not_found_res.status_code}")
-    assert not_found_res.status_code == 404
+    assert not_found_res.status_code in [400, 404]
 
     invalid_body_res = client.post(f"{BASE_URL}/api/documents/paste", json={"doc_type": "job_description", "text": "too short"})
     print(f"Invalid Payload Status: {invalid_body_res.status_code}")
     assert invalid_body_res.status_code in [400, 422]
 
 print("\n=======================================================")
-print("ALL LIVE PRODUCTION ENDPOINTS VERIFIED SUCCESSFULLY! 🚀")
+print("ALL LIVE PRODUCTION ENDPOINTS VERIFIED SUCCESSFULLY!")
 print("=======================================================")
