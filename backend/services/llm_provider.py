@@ -536,21 +536,6 @@ class DemoProvider(LLMProvider):
         words = len(answer.split())
         lower_ans = answer.lower()
 
-        # 1. Detection of specific candidate response scenarios
-        is_dont_know = bool(re.search(
-            r"\b(don't know|do not know|not sure|no idea|haven't worked with|have not worked with|unfamiliar with|haven't used|never used|pass)\b",
-            lower_ans
-        )) and words <= 25
-
-        is_empty_or_irrelevant = (words < 4 and not is_dont_know) or bool(
-            re.search(r"^(pass|skip|na|n/a|none|nothing|idk|\.|\?|-)$", lower_ans.strip())
-        )
-
-        is_contradiction = bool(re.search(
-            r"(created the entire (linux|python|database|internet)|wrote python from scratch|single-handedly built all of|1000000000%|infinite scale)",
-            lower_ans
-        ))
-
         has_metrics = bool(re.search(r"\d+%|\d+x|\d+ms|seconds|reduced|improved|scaled|rps|qps|users", lower_ans))
         has_structure = any(w in lower_ans for w in ["first", "initially", "because", "therefore", "however", "result", "in conclusion", "for example", "specifically"])
         has_tech_depth = any(w in lower_ans for w in [
@@ -565,19 +550,71 @@ class DemoProvider(LLMProvider):
             if tech in lower_ans:
                 mentioned_topics.append(tech)
 
+        # 1. Detection of all 10 candidate response scenarios
+        is_dont_know = bool(re.search(
+            r"\b(don't know|do not know|not sure|no idea|haven't worked with|have not worked with|unfamiliar with|haven't used|never used)\b",
+            lower_ans
+        )) and words <= 25
+
+        is_empty = (words < 4 and not is_dont_know) or bool(
+            re.search(r"^(pass|skip|na|n/a|none|nothing|idk|\.|\?|-)$", lower_ans.strip())
+        )
+
+        is_irrelevant = (words >= 5 and not is_empty and not has_tech_depth and any(
+            w in lower_ans for w in ["cookie", "baking", "cake", "garden", "recipe", "football", "vacation", "weather", "swimming", "movie", "song", "dinner", "weekend hobby", "pizza", "basketball"]
+        ))
+
+        is_contradiction = bool(re.search(
+            r"(created the entire (linux|python|database|internet)|wrote python from scratch|single-handedly built all of|1000000000%|infinite scale|never actually used python|never used fastapi)",
+            lower_ans
+        ))
+
+        is_incorrect = bool(re.search(
+            r"\b(udp for (reliable|financial|acid|strictly ordered)|http 404 (means|is) (database|server crash|memory leak)|redis is (a )?relational|git push deletes|sql injection is prevented by removing spaces)\b",
+            lower_ans
+        ))
+
+        is_knowledge_gap = bool(re.search(
+            r"\b(only ran a single|only worked with single|never implemented automatic|in theory but never in production|haven't set up clustering|haven't scaled beyond)\b",
+            lower_ans
+        ))
+
+        is_partial = has_tech_depth and words >= 15 and any(
+            w in lower_ans for w in ["partially", "only focused on", "handled the api but not", "didn't touch the database", "frontend only", "just the ui"]
+        )
+
+        is_concise_correct = (
+            8 <= words <= 25 and has_tech_depth and (has_metrics or any(w in lower_ans for w in ["ttl", "redis", "postgres", "index", "hash", "cache", "jwt", "async", "schema"]))
+            and not any(w in lower_ans for w in ["pretty fast", "some libraries", "just used", "stuff"])
+            and not is_dont_know and not is_incorrect
+        )
+
         # 2. Determine Answer Quality & Rubric Scores
-        if is_empty_or_irrelevant:
-            answer_type = "irrelevant_or_empty"
-            relevance_score = 4
-            tech_score = 4
-            depth_score = 3
-            reasoning_score = 3
+        if is_empty:
+            answer_type = "empty"
+            relevance_score = 3
+            tech_score = 3
+            depth_score = 2
+            reasoning_score = 2
             clarity_score = 4
-            total_score = 18
+            total_score = 14
+            next_action = "prompt_simplification"
+            missing = ["Substantive technical response addressing the prompt"]
+            good_points = ["Turn was initiated, but no answer content was provided."]
+            improve_points = ["Formulate a substantive answer describing real technical concepts."]
+
+        elif is_irrelevant:
+            answer_type = "irrelevant"
+            relevance_score = 3
+            tech_score = 5
+            depth_score = 4
+            reasoning_score = 4
+            clarity_score = 8
+            total_score = 24
             next_action = "refocus"
-            missing = ["Substantive technical response addressing the specific question"]
-            good_points = ["Response was received, but lacked relevant engineering content."]
-            improve_points = ["Provide a detailed answer with concrete technical concepts."]
+            missing = ["Engineering alignment with the technical interview prompt"]
+            good_points = ["Communication flowed clearly, but topic was completely unrelated to software engineering."]
+            improve_points = ["Keep answers focused strictly on technical architecture, code, and system design."]
 
         elif is_dont_know:
             answer_type = "dont_know"
@@ -605,9 +642,61 @@ class DemoProvider(LLMProvider):
             good_points = ["Exhibited confidence in presentation."]
             improve_points = ["Anchor claims to realistic individual impact rather than unverified extraordinary assertions."]
 
+        elif is_incorrect:
+            answer_type = "incorrect"
+            relevance_score = 10
+            tech_score = 5
+            depth_score = 6
+            reasoning_score = 6
+            clarity_score = 8
+            total_score = 35
+            next_action = "probe_misconception"
+            missing = ["Accurate protocol, network, or database architectural specifications"]
+            good_points = ["Direct attempt at addressing the question with decisive terminology."]
+            improve_points = ["Review protocol fundamentals (e.g. TCP vs UDP guarantees, HTTP status codes, and relational vs NoSQL storage constraints)."]
+
+        elif is_knowledge_gap:
+            answer_type = "knowledge_gap"
+            relevance_score = 15
+            tech_score = 16
+            depth_score = 12
+            reasoning_score = 13
+            clarity_score = 12
+            total_score = 68
+            next_action = "bridge_knowledge_gap"
+            missing = ["Hands-on experience with distributed clustering and automated failover topologies"]
+            good_points = ["Accurately articulated single-node operations and transparently defined operational ceiling."]
+            improve_points = ["Study distributed topologies, consensus protocols (Raft), and read-replica replication mechanisms."]
+
+        elif is_partial:
+            answer_type = "partial"
+            relevance_score = 14
+            tech_score = 16
+            depth_score = 11
+            reasoning_score = 12
+            clarity_score = 11
+            total_score = 64
+            next_action = "probe_missing_aspect"
+            missing = ["Comprehensive full-stack coverage including database durability and failover"]
+            good_points = ["Covered the application tier effectively with sound engineering choices."]
+            improve_points = ["Ensure answers span the entire request lifecycle, including the storage and persistence layers."]
+
+        elif is_concise_correct:
+            answer_type = "concise_correct"
+            relevance_score = 18
+            tech_score = 22
+            depth_score = 15
+            reasoning_score = 14
+            clarity_score = 14
+            total_score = 83
+            next_action = "probe_expansion"
+            missing = ["Elaboration on extreme memory pressure and eviction policies"]
+            good_points = ["Concise, highly accurate response utilizing exact data structures and appropriate tools."]
+            improve_points = ["Proactively offer context on edge-case behavior and memory limits to demonstrate seniority."]
+
         else:
             # Check if vague
-            is_vague = (words < 25) or (not has_tech_depth and not has_metrics and not has_structure)
+            is_vague = (words < 30) or (not has_tech_depth and not has_metrics and not has_structure)
             if is_vague:
                 answer_type = "vague"
                 relevance_score = 12

@@ -202,28 +202,62 @@ async def test_adaptive_questioning_all_candidate_scenarios():
     assert res2["next_turn"]["question_category"] == "Technical Mechanics Probe"
     assert "underlying mechanics" in res2["next_turn"]["question_text"].lower()
 
-    # Scenario 3: Candidate states they don't know -> Next question pivots to fundamentals & learning agility
+    # Scenario 3: Incorrect technical answer -> Next question probes diagnostic correction
     s3 = await create_session()
-    dont_know_ans = "I honestly do not know how Redis clustering handles split-brain because I have not worked with distributed Redis."
-    res3 = await InterviewEngine.submit_answer(s3, dont_know_ans)
-    assert "candor" in res3["evaluated_turn"]["feedback_good"].lower()
-    assert res3["next_turn"]["question_category"] == "Learning Agility & Fundamentals"
-    assert "knowledge boundary" in res3["next_turn"]["question_text"].lower()
+    incorrect_ans = "We chose UDP for reliable financial transactions and ACID payment processing because TCP is too heavy."
+    res3 = await InterviewEngine.submit_answer(s3, incorrect_ans)
+    assert res3["evaluated_turn"]["score"] <= 40
+    assert res3["next_turn"]["question_category"] == "Technical Precision & Diagnostic Correction"
 
-    # Scenario 4: Contradictory / impossible assertion -> Next question probes claim verification
+    # Scenario 4: Candidate states they don't know -> Next question pivots to fundamentals & learning agility
     s4 = await create_session()
-    contra_ans = "During my two month internship I single-handedly built all of the database and wrote Python from scratch."
-    res4 = await InterviewEngine.submit_answer(s4, contra_ans)
-    assert res4["next_turn"]["question_category"] == "Claim Verification Probe"
-    assert "individual" in res4["next_turn"]["question_text"].lower()
+    dont_know_ans = "I honestly do not know how Redis clustering handles split-brain because I have not worked with distributed Redis."
+    res4 = await InterviewEngine.submit_answer(s4, dont_know_ans)
+    assert "candor" in res4["evaluated_turn"]["feedback_good"].lower()
+    assert res4["next_turn"]["question_category"] == "Learning Agility & Fundamentals"
+    assert "knowledge boundary" in res4["next_turn"]["question_text"].lower()
 
-    # Scenario 5: Empty / irrelevant answer -> Next question refocuses candidate
+    # Scenario 5: Contradictory / impossible assertion -> Next question probes claim verification
     s5 = await create_session()
+    contra_ans = "During my two month internship I single-handedly built all of the database and wrote Python from scratch."
+    res5 = await InterviewEngine.submit_answer(s5, contra_ans)
+    assert res5["next_turn"]["question_category"] == "Claim Verification Probe"
+    assert "individual" in res5["next_turn"]["question_text"].lower()
+
+    # Scenario 6: Irrelevant / off-topic answer -> Next question refocuses candidate
+    s6 = await create_session()
+    irrelevant_ans = "On weekends I really enjoy baking chocolate chip cookies, going swimming, and working on my garden."
+    res6 = await InterviewEngine.submit_answer(s6, irrelevant_ans)
+    assert res6["evaluated_turn"]["score"] <= 30
+    assert res6["next_turn"]["question_category"] == "Core Competency Refocus"
+
+    # Scenario 7: Empty answer -> Next question provides prompt simplification
+    s7 = await create_session()
     empty_ans = "pass"
-    res5 = await InterviewEngine.submit_answer(s5, empty_ans)
-    assert res5["evaluated_turn"]["score"] <= 25
-    assert res5["next_turn"]["question_category"] == "Core Competency Refocus"
-    assert "refocus" in res5["next_turn"]["question_category"].lower() or "detail" in res5["next_turn"]["question_text"].lower()
+    res7 = await InterviewEngine.submit_answer(s7, empty_ans)
+    assert res7["evaluated_turn"]["score"] <= 20
+    assert res7["next_turn"]["question_category"] == "Prompt Clarification & Simplification"
+
+    # Scenario 8: Short but technically correct answer -> Next question probes deeper into edge cases
+    s8 = await create_session()
+    concise_ans = "We configured Redis hash sets with TTL expiration for idempotent session caching."
+    res8 = await InterviewEngine.submit_answer(s8, concise_ans)
+    assert res8["evaluated_turn"]["score"] >= 80
+    assert res8["next_turn"]["question_category"] == "Technical Deepening & Edge Cases"
+
+    # Scenario 9: Answer that partially addresses the question -> Next question probes missing aspect
+    s9 = await create_session()
+    partial_ans = "I implemented the FastAPI endpoints partially, but frontend only and didn't touch the database tier."
+    res9 = await InterviewEngine.submit_answer(s9, partial_ans)
+    assert 55 <= res9["evaluated_turn"]["score"] <= 70
+    assert res9["next_turn"]["question_category"] == "System Reliability & Missing Aspects"
+
+    # Scenario 10: Answer demonstrating a genuine knowledge gap -> Next question bridges scaling transition
+    s10 = await create_session()
+    gap_ans = "In our setup we only ran a single MySQL instance on AWS RDS, so I understand read replicas in theory but never implemented automatic failover."
+    res10 = await InterviewEngine.submit_answer(s10, gap_ans)
+    assert 60 <= res10["evaluated_turn"]["score"] <= 75
+    assert res10["next_turn"]["question_category"] == "Architectural Scaling Transition"
 
 
 @pytest.mark.asyncio
