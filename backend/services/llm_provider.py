@@ -737,6 +737,24 @@ class DemoProvider(LLMProvider):
                     good_points = ["Directly addressed prompt with sound engineering reasoning."]
                     improve_points = ["Include concrete baseline and end-state metrics to reinforce impact."]
 
+        # Delivery cadence & filler word analysis
+        filler_targets = ["um", "uh", "like", "basically", "you know", "actually", "literally", "sort of", "kind of"]
+        filler_matches = []
+        total_fillers = 0
+        for ft in filler_targets:
+            pattern = rf"\b{re.escape(ft)}\b"
+            matches = len(re.findall(pattern, lower_ans))
+            if matches > 0:
+                total_fillers += matches
+                filler_matches.append(f"'{ft}' ({matches}x)")
+
+        if total_fillers >= 2:
+            improve_points.append(
+                f"Delivery Cadence: Detected {total_fillers} filler phrase(s) ({', '.join(filler_matches[:3])}). Aim to replace filler words with brief pauses to sound more authoritative."
+            )
+        elif words >= 30 and total_fillers == 0:
+            good_points.append("Delivery Cadence: Clear, structured speech with zero detected filler words.")
+
         ideal_direction = (
             f"An exemplary response follows the STAR framework: articulate the precise problem context, "
             f"detail the technical architecture and tools used, explain why alternative approaches were rejected, "
@@ -848,15 +866,45 @@ class DemoProvider(LLMProvider):
                 "Deep-Dive Edge Cases: Needs further articulation of resilience patterns under cascading failure."
             ]
 
+        job_fit = context.get("job_fit") or {}
+        missing_skills = []
+        if job_fit and job_fit.get("missing_skills"):
+            missing_skills = [
+                m.get("skill") if isinstance(m, dict) else str(m)
+                for m in job_fit["missing_skills"]
+            ]
+
+        p1_topic = f"Closing Target Skill Deficiencies: {', '.join(missing_skills[:3])}" if missing_skills else "System Reliability & Failure Handling"
+        p1_why = (
+            f"Explicitly required in the target {job.get('role_title', 'target')} job description but lacked verified project evidence on your resume."
+            if missing_skills
+            else f"Essential for the {job.get('role_title', 'target')} role to prevent service outages."
+        )
+        p1_study = (
+            f"Review official architecture specifications, common implementation pitfalls, and performance trade-offs for {', '.join(missing_skills[:3])}."
+            if missing_skills
+            else "Circuit breaker patterns, idempotency keys, rate limiting algorithms, and retry budgets."
+        )
+        p1_exercise = (
+            f"Build a practical mini-project integrating {missing_skills[0]} and write 3 STAR bullet points summarizing the technical outcome."
+            if missing_skills
+            else "Design a resilient payment processing worker that handles 504 gateway timeouts without duplicate charges."
+        )
+        p1_criteria = (
+            f"Able to confidently explain architectural trade-offs and error scenarios involving {missing_skills[0]}."
+            if missing_skills
+            else "Able to articulate fallback strategies and data reconciliation within a 3-minute technical explanation."
+        )
+
         # Prioritized Preparation Plan
         prioritized_prep_plan = [
             {
                 "priority": 1,
-                "topic": "System Reliability & Failure Handling",
-                "why_it_matters": f"Essential for the {job.get('role_title', 'target')} role to prevent service outages.",
-                "what_to_study": "Circuit breaker patterns, idempotency keys, rate limiting algorithms, and retry budgets.",
-                "practical_exercise": "Design a resilient payment processing worker that handles 504 gateway timeouts without duplicate charges.",
-                "completion_criteria": "Able to articulate fallback strategies and data reconciliation within a 3-minute technical explanation."
+                "topic": p1_topic,
+                "why_it_matters": p1_why,
+                "what_to_study": p1_study,
+                "practical_exercise": p1_exercise,
+                "completion_criteria": p1_criteria
             },
             {
                 "priority": 2,

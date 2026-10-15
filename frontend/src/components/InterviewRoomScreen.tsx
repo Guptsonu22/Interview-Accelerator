@@ -19,7 +19,9 @@ import {
   Sparkles,
   CheckCircle2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Camera,
+  CameraOff
 } from 'lucide-react';
 
 interface InterviewRoomScreenProps {
@@ -44,6 +46,12 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
   const [lastEvaluation, setLastEvaluation] = useState<InterviewTurn | null>(null);
   const [showHistory, setShowHistory] = useState<boolean>(false);
 
+  // Video State & Refs
+  const [isVideoEnabled, setIsVideoEnabled] = useState<boolean>(false);
+  const [videoNotice, setVideoNotice] = useState<string | null>(null);
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const mediaStreamRef = React.useRef<MediaStream | null>(null);
+
   // Voice Hooks
   const speechRecognition = useSpeechRecognition();
   const speechSynthesis = useSpeechSynthesis();
@@ -62,6 +70,52 @@ export const InterviewRoomScreen: React.FC<InterviewRoomScreenProps> = ({
       setAnswerText((prev) => (prev !== speechRecognition.transcript ? speechRecognition.transcript : prev));
     }
   }, [speechRecognition.transcript]);
+
+  // Video Stream Lifecycle
+  const handleToggleVideo = async () => {
+    if (isVideoEnabled) {
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+      }
+      setIsVideoEnabled(false);
+      setVideoNotice(null);
+    } else {
+      setVideoNotice(null);
+      try {
+        if (!navigator?.mediaDevices?.getUserMedia) {
+          setVideoNotice('Webcam access is not supported by your browser environment. Voice and text modes remain active.');
+          return;
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 480, height: 360 },
+          audio: false,
+        });
+        mediaStreamRef.current = stream;
+        setIsVideoEnabled(true);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (err: any) {
+        setVideoNotice('Camera permission was not granted or no webcam was detected. You can seamlessly proceed using voice or text.');
+        setIsVideoEnabled(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isVideoEnabled && videoRef.current && mediaStreamRef.current) {
+      videoRef.current.srcObject = mediaStreamRef.current;
+    }
+  }, [isVideoEnabled]);
+
+  useEffect(() => {
+    return () => {
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
 
   const handleToggleMic = () => {
     if (speechRecognition.isListening) {
